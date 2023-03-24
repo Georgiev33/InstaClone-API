@@ -21,12 +21,13 @@ public class UserService {
     @Autowired
     private BCryptPasswordEncoder encoder;
 
-    public void login(UserLoginDTO userLoginDTO) {
+    public Long login(UserLoginDTO userLoginDTO) {
         User user = findUserByUsername(userLoginDTO.getUsername())
                 .orElseThrow(() -> new BadRequestException("Bad credentials"));
         if (!encoder.matches(userLoginDTO.getPassword(), user.getPassword())) {
             throw new BadRequestException("Bad credentials");
         }
+        return user.getId();
     }
 
     public void createUser(UserRegistrationDTO userRegistrationDTO) {

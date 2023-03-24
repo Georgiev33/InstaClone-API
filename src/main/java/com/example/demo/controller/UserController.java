@@ -24,10 +24,12 @@ public class UserController {
 
     @PostMapping("/auth")
     public void login(@RequestBody UserLoginDTO userLoginDTO, HttpSession httpSession) {
-        userService.login(userLoginDTO);
-        if (httpSession.getAttribute("LOGGED") != null)
+        Long userId = userService.login(userLoginDTO);
+        if (httpSession.getAttribute("LOGGED") != null) {
             throw new BadRequestException("You are already logged");
+        }
         httpSession.setAttribute("LOGGED", true);
+        httpSession.setAttribute("USER_ID", userId);
     }
 
     @PostMapping("/logout")
