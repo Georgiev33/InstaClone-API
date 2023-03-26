@@ -29,7 +29,7 @@ public class UserService {
     @Autowired
     private SimpleMailMessage simpleMailMessage;
 
-    public void login(UserLoginDTO userLoginDTO) {
+    public Long login(UserLoginDTO userLoginDTO) {
         User user = findUserByUsername(userLoginDTO.getUsername())
                 .orElseThrow(() -> new BadRequestException("Bad credentials"));
         if (!encoder.matches(userLoginDTO.getPassword(), user.getPassword())) {
@@ -38,6 +38,7 @@ public class UserService {
         if(!user.isVerified()){
             throw new BadRequestException("Your account isn`t verified");
         }
+        return user.getId();
     }
 
     public void createUser(UserRegistrationDTO userRegistrationDTO) {

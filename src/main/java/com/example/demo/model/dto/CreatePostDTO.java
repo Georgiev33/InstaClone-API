@@ -10,4 +10,5 @@ import java.util.List;
 public class CreatePostDTO {
     private String caption;
     private List<MultipartFile> content;
+    private List<String> hashtags;
 }
