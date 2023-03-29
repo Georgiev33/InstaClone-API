@@ -13,26 +13,32 @@ import com.example.demo.repository.PostContentRepository;
 import com.example.demo.repository.PostRepository;
 import com.example.demo.repository.UserRepository;
 import jakarta.transaction.Transactional;
-import org.hibernate.event.spi.SaveOrUpdateEvent;
+import lombok.AllArgsConstructor;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestMapping;
+
 import org.springframework.web.multipart.MultipartFile;
 
+
 import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+
 import java.util.List;
-import java.util.Optional;
+
 import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class PostService {
 
+    public static final String MEDIA_URI = "/post/media/";
+    public static final String HTTP_LOCALHOST = "http://localhost:";
+    @Autowired
+    private String serverPort;
     @Autowired
     private FileService fileService;
     @Autowired
@@ -44,9 +50,9 @@ public class PostService {
     @Autowired
     private PostContentRepository contentRepository;
     @Autowired
-    private HashtagRepository hashtagRepository;
-    @Value("${server.port}")
-    private  String serverPort;
+    private TagService tagService;
+
+
     @Transactional
     public PostResponseDTO createPost(CreatePostDTO dto, long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
@@ -58,37 +64,31 @@ public class PostService {
         post.setDateCreated(LocalDateTime.now());
         post.setCaption(dto.getCaption());
         post.setUser(user);
-        for (String postHashtag : dto.getHashtags()) {
-            Hashtag hashtag = hashtagRepository.findByTagName(postHashtag);
-            if(hashtag == null){
-               hashtag = createHashtag(postHashtag, post);
-            }
-            post.getHashtags().add(hashtag);
-        }
+
+        tagService.addHashTags(dto.getHashtags(), post.getHashtags(), post);
+
         Post saved = postRepository.save(post);
 
         PostResponseDTO responseDTO = modelMapper.map(saved,PostResponseDTO.class);
-        String contentUrl = "http://localhost:" + serverPort + "/post/media/" + post.getId();
-        responseDTO.setContentUrl(contentUrl);
+        setResponseUrl(responseDTO, post.getId());
         responseDTO.setHashtags(dto.getHashtags());
+
+
         for(MultipartFile file : dto.getContent()){
             String fileName = fileService.saveFile(file, userId);
             PostContent content = new PostContent();
             content.setPost(post);
-            content.setContentUrl("http://localhost:" + serverPort + "/post/content/" + fileName);
+            content.setContentUrl(HTTP_LOCALHOST + serverPort + "/post/content/" + fileName);
             contentRepository.save(content);
-
         }
+
         return responseDTO;
     }
 
-    private Hashtag createHashtag(String hashtagName, Post post) {
-        Hashtag hashtag = new Hashtag();
-        hashtag.getPosts().add(post);
-        hashtag.setTagName(hashtagName);
-        return hashtagRepository.save(hashtag);
+    private void setResponseUrl(PostResponseDTO responseDTO, Long postId) {
+        String contentUrl = HTTP_LOCALHOST + serverPort + MEDIA_URI + postId;
+        responseDTO.setContentUrl(contentUrl);
     }
-
 
     public List<String> getAllPostUrls(long postId) {
         List<PostContent> postContents = contentRepository.findAllByPostId(postId)
@@ -100,4 +100,6 @@ public class PostService {
     public File getContent(String fileName) {
         return fileService.getFile(fileName);
     }
+
+
 }

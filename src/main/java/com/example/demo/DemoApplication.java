@@ -1,6 +1,7 @@
 package com.example.demo;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
@@ -30,6 +31,10 @@ public class DemoApplication {
     public SimpleMailMessage templateSimpleMessage() {
         return new SimpleMailMessage();
     }
-
+    @Bean(name = "server.port")
+    @Value("${server.port}")
+    public String serverPort(String serverPort){
+        return serverPort;
+    }
 
 }
