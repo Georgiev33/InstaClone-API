@@ -60,12 +60,12 @@ public class UserService {
         return ResponseEntity.ok("Registration successfully verified");
     }
 
-    public boolean doesEmailExist(String email) {
+    private boolean doesEmailExist(String email) {
         Optional<User> u = userRepository.findUserByEmail(email);
         return u.isPresent();
     }
 
-    public boolean doesUsernameExist(String username) {
+    private boolean doesUsernameExist(String username) {
         Optional<User> u = userRepository.findUserByUsername(username);
         return u.isPresent();
     }
@@ -79,10 +79,10 @@ public class UserService {
             throw new BadRequestException("Passwords must match");
         }
         if (doesUsernameExist(userRegistrationDTO.getUsername())) {
-            throw new BadRequestException("Username already exist");
+            throw new BadRequestException("Username already exists");
         }
         if (doesEmailExist(userRegistrationDTO.getEmail())) {
-            throw new BadRequestException("Email already exist");
+            throw new BadRequestException("Email already exists");
         }
     }
 
