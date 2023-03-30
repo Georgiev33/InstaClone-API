@@ -13,7 +13,6 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
@@ -21,10 +20,12 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Optional;
 
+import static com.example.demo.util.Constants.*;
 import static org.assertj.core.api.AssertionsForClassTypes.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -32,7 +33,6 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PostServiceTest {
-
     @Mock
     private FileService fileService;
     @Mock
@@ -48,13 +48,15 @@ class PostServiceTest {
     @Value("${server.port}")
     private String serverPort;
     private PostService underTest;
+
     @BeforeEach
     void setUp() {
-        underTest = new PostService(serverPort,fileService, userRepository,postRepository,modelMapper, contentRepository, tagService);
+        underTest = new PostService(serverPort, fileService, userRepository,
+                postRepository, modelMapper, contentRepository, tagService);
     }
 
     @Test
-    void nonExistentUserIdShouldThrowNotFound(){
+    void nonExistentUserIdShouldThrowNotFound() {
         //given
         CreatePostDTO createPostDTO = new CreatePostDTO();
 
@@ -64,11 +66,11 @@ class PostServiceTest {
         //then
         assertThatExceptionOfType(NotFoundException.class)
                 .isThrownBy(() -> underTest.createPost(createPostDTO, 1L))
-                .withMessage("User not found");
+                .withMessage(USER_NOT_FOUND);
     }
 
     @Test
-    void existingUserIdShouldntThrowNotFound(){
+    void existingUserIdShouldntThrowNotFound() {
         //given
         CreatePostDTO createPostDTO = new CreatePostDTO();
         createPostDTO.setContent(new ArrayList<>());
@@ -80,7 +82,7 @@ class PostServiceTest {
     }
 
     @Test
-    void createPostRequestWithNoContentShouldThrowBadRequest(){
+    void createPostRequestWithNoContentShouldThrowBadRequest() {
         //given
         CreatePostDTO createPostDTO = new CreatePostDTO();
 
@@ -90,12 +92,12 @@ class PostServiceTest {
         //then
         assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> underTest.createPost(createPostDTO, 1L))
-                .withMessage("Post content is required.");
+                .withMessage(POST_CONTENT_IS_REQUIRED);
 
     }
 
     @Test
-    void createPostRequestWithContentShouldntThrowBadRequest(){
+    void createPostRequestWithContentShouldntThrowBadRequest() {
         //given
         CreatePostDTO createPostDTO = new CreatePostDTO();
         createPostDTO.setContent(new ArrayList<>());
@@ -108,7 +110,7 @@ class PostServiceTest {
 
 
     @Test
-    void createPostRequestWithTagsShouldInvokeAddHashTags(){
+    void createPostRequestWithTagsShouldInvokeAddHashTags() {
         //given
         CreatePostDTO createPostDTO = new CreatePostDTO();
         createPostDTO.setContent(new ArrayList<>());
@@ -118,11 +120,11 @@ class PostServiceTest {
         when(modelMapper.map(any(), any())).thenReturn(new PostResponseDTO());
         //then
         underTest.createPost(createPostDTO, 1L);
-        verify(tagService).addHashTags(anyList(), anySet(), any(Post.class));
+        verify(tagService).addHashTags(anyList(), any(Post.class));
     }
 
     @Test
-    void createPostRequestWithoutTagsShouldntInvokeAddHashTags(){
+    void createPostRequestWithoutTagsShouldntInvokeAddHashTags() {
         //given
         CreatePostDTO createPostDTO = new CreatePostDTO();
         createPostDTO.setContent(new ArrayList<>());
@@ -131,16 +133,16 @@ class PostServiceTest {
         when(modelMapper.map(any(), any())).thenReturn(new PostResponseDTO());
         //then
         underTest.createPost(createPostDTO, 1L);
-        verify(tagService, never()).addHashTags(anyList(), anySet(), any(Post.class));
+        verify(tagService, never()).addHashTags(anyList(), any(Post.class));
     }
+
     @Test
     @SneakyThrows
-    void createPostWithMultipleFilesShouldInvokeSaveFile(){
+    void createPostWithMultipleFilesShouldInvokeSaveFile() {
         //given
         CreatePostDTO createPostDTO = new CreatePostDTO();
         createPostDTO.setContent(new ArrayList<>());
         ArrayList<MultipartFile> mockFiles = new ArrayList<>();
-
 
         mockFiles.add(new MockMultipartFile("test", "testStr".getBytes(StandardCharsets.UTF_8)));
         mockFiles.add(new MockMultipartFile("test2", "testString".getBytes(StandardCharsets.UTF_8)));
@@ -151,6 +153,6 @@ class PostServiceTest {
         when(modelMapper.map(any(), any())).thenReturn(new PostResponseDTO());
         //then
         underTest.createPost(createPostDTO, 1L);
-        verify(fileService,times(2)).saveFile(any(), anyLong());
+        verify(fileService, times(2)).saveFile(any(), anyLong());
     }
 }

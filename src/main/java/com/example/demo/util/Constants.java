@@ -8,13 +8,15 @@ public class Constants {
     public static final String PASSWORDS_MUST_MATCH = "Passwords must match";
     public static final String USERNAME_ALREADY_EXISTS = "Username already exists";
     public static final String EMAIL_ALREADY_EXISTS = "Email already exists";
-    public static final String APPLICATION_URL = "http://localhost:8080/user/";
+    public static final String APPLICATION_URL_USER = "http://localhost:8080/user/";
     public static final String DO_NOT_REPLY = "do.not.reply";
     public static final int INT_64 = 64;
     public static final String MEDIA_URI = "/post/media/";
     public static final String HTTP_LOCALHOST = "http://localhost:";
     public static final String USER_NOT_FOUND = "User not found";
     public static final String POST_CONTENT = "/post/content/";
+    public static final String POST_CONTENT_IS_REQUIRED1 = "Post content is required.";
+    public static final String POST_CONTENT_IS_REQUIRED = "Post content is required.";
     public static final String INVALID_POST_ID = "Invalid postId";
     public static final String INVALID_FILE_TYPE = "Invalid file type.";
     public static final String IMAGE_JPEG = "image/jpeg";

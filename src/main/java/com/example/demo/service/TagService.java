@@ -18,13 +18,13 @@ public class TagService {
     }
 
     //add nonexistent tags to db, if they exist add them to posts' set
-    public void addHashTags(List<String> tagsToAdd, Set<Hashtag> postHashTags, Post post) {
+    public void addHashTags(List<String> tagsToAdd, Post post) {
         for (String postHashtag : tagsToAdd) {
             Hashtag hashtag = hashtagRepository.findByTagName(postHashtag);
             if (hashtag == null) {
                 hashtag = createHashtag(postHashtag, post);
             }
-            postHashTags.add(hashtag);
+            post.getHashtags().add(hashtag);
         }
     }
 

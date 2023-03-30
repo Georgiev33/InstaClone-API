@@ -14,12 +14,8 @@ import jakarta.transaction.Transactional;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.stereotype.Service;
-
 import org.springframework.web.multipart.MultipartFile;
-
-
 import java.io.File;
 import java.time.LocalDateTime;
 
@@ -57,7 +53,7 @@ public class PostService {
     public PostResponseDTO createPost(CreatePostDTO dto, long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
         if (dto.getContent() == null) {
-            throw new BadRequestException("Post content is required.");
+            throw new BadRequestException(POST_CONTENT_IS_REQUIRED1);
         }
 
         Post post = new Post();
@@ -65,7 +61,7 @@ public class PostService {
         post.setCaption(dto.getCaption());
         post.setUser(user);
 
-        tagService.addHashTags(dto.getHashtags(), post.getHashtags(), post);
+        tagService.addHashTags(dto.getHashtags(), post);
 
         Post saved = postRepository.save(post);
 
