@@ -11,13 +11,17 @@ import java.util.Set;
 
 @Service
 public class TagService {
-    @Autowired
-    private HashtagRepository hashtagRepository;
+    private final HashtagRepository hashtagRepository;
+
+    public TagService(@Autowired HashtagRepository hashtagRepository) {
+        this.hashtagRepository = hashtagRepository;
+    }
+
     //add nonexistent tags to db, if they exist add them to posts' set
     public void addHashTags(List<String> tagsToAdd, Set<Hashtag> postHashTags, Post post) {
         for (String postHashtag : tagsToAdd) {
             Hashtag hashtag = hashtagRepository.findByTagName(postHashtag);
-            if(hashtag == null){
+            if (hashtag == null) {
                 hashtag = createHashtag(postHashtag, post);
             }
             postHashTags.add(hashtag);

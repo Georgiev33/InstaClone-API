@@ -2,23 +2,19 @@ package com.example.demo.service;
 
 import com.example.demo.model.dto.CreatePostDTO;
 import com.example.demo.model.dto.PostResponseDTO;
-import com.example.demo.model.entity.Hashtag;
 import com.example.demo.model.entity.Post;
 import com.example.demo.model.entity.PostContent;
 import com.example.demo.model.entity.User;
 import com.example.demo.model.exception.BadRequestException;
 import com.example.demo.model.exception.NotFoundException;
-import com.example.demo.repository.HashtagRepository;
 import com.example.demo.repository.PostContentRepository;
 import com.example.demo.repository.PostRepository;
 import com.example.demo.repository.UserRepository;
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.DependsOn;
+
 import org.springframework.stereotype.Service;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -31,32 +27,36 @@ import java.util.List;
 
 import java.util.stream.Collectors;
 
-@Service
-@AllArgsConstructor
-public class PostService {
+import static com.example.demo.util.Constants.*;
 
-    public static final String MEDIA_URI = "/post/media/";
-    public static final String HTTP_LOCALHOST = "http://localhost:";
-    @Autowired
-    private String serverPort;
-    @Autowired
-    private FileService fileService;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private PostRepository postRepository;
-    @Autowired
-    private ModelMapper modelMapper;
-    @Autowired
-    private PostContentRepository contentRepository;
-    @Autowired
-    private TagService tagService;
+@Service
+public class PostService {
+    private final String serverPort;
+    private final FileService fileService;
+    private final UserRepository userRepository;
+    private final PostRepository postRepository;
+    private final ModelMapper modelMapper;
+    private final PostContentRepository contentRepository;
+    private final TagService tagService;
+
+    public PostService(@Autowired String serverPort, @Autowired FileService fileService,
+                       @Autowired UserRepository userRepository, @Autowired PostRepository postRepository,
+                       @Autowired ModelMapper modelMapper, @Autowired PostContentRepository contentRepository,
+                       @Autowired TagService tagService) {
+        this.serverPort = serverPort;
+        this.fileService = fileService;
+        this.userRepository = userRepository;
+        this.postRepository = postRepository;
+        this.modelMapper = modelMapper;
+        this.contentRepository = contentRepository;
+        this.tagService = tagService;
+    }
 
 
     @Transactional
     public PostResponseDTO createPost(CreatePostDTO dto, long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
-        if(dto.getContent() == null){
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
+        if (dto.getContent() == null) {
             throw new BadRequestException("Post content is required.");
         }
 
@@ -69,16 +69,16 @@ public class PostService {
 
         Post saved = postRepository.save(post);
 
-        PostResponseDTO responseDTO = modelMapper.map(saved,PostResponseDTO.class);
+        PostResponseDTO responseDTO = modelMapper.map(saved, PostResponseDTO.class);
         setResponseUrl(responseDTO, post.getId());
         responseDTO.setHashtags(dto.getHashtags());
 
 
-        for(MultipartFile file : dto.getContent()){
+        for (MultipartFile file : dto.getContent()) {
             String fileName = fileService.saveFile(file, userId);
             PostContent content = new PostContent();
             content.setPost(post);
-            content.setContentUrl(HTTP_LOCALHOST + serverPort + "/post/content/" + fileName);
+            content.setContentUrl(HTTP_LOCALHOST + serverPort + POST_CONTENT + fileName);
             contentRepository.save(content);
         }
 
@@ -92,7 +92,7 @@ public class PostService {
 
     public List<String> getAllPostUrls(long postId) {
         List<PostContent> postContents = contentRepository.findAllByPostId(postId)
-                .orElseThrow(() -> new BadRequestException("Invalid postId"));
+                .orElseThrow(() -> new BadRequestException(INVALID_POST_ID));
 
         return postContents.stream().map(PostContent::getContentUrl).collect(Collectors.toList());
     }

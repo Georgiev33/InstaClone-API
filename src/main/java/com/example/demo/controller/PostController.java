@@ -14,26 +14,31 @@ import java.io.File;
 import java.nio.file.Files;
 import java.util.List;
 
+import static com.example.demo.util.Constants.USER_ID;
+
 @RestController
 @RequestMapping("/post")
 public class PostController {
-    @Autowired
-    private PostService postService;
+    private final PostService postService;
+
+    public PostController(@Autowired PostService postService) {
+        this.postService = postService;
+    }
 
     @PostMapping
-    public ResponseEntity<PostResponseDTO> createPost(@ModelAttribute CreatePostDTO dto, HttpSession session){
-        PostResponseDTO responseDTO = postService.createPost(dto, (long) session.getAttribute("USER_ID"));
+    public ResponseEntity<PostResponseDTO> createPost(@ModelAttribute CreatePostDTO dto, HttpSession session) {
+        PostResponseDTO responseDTO = postService.createPost(dto, (long) session.getAttribute(USER_ID));
         return ResponseEntity.ok(responseDTO);
     }
 
     @GetMapping("/media/{postId}")
-    public List<String> getPostMedia(@PathVariable long postId){
+    public List<String> getPostMedia(@PathVariable long postId) {
         return postService.getAllPostUrls(postId);
     }
 
     @GetMapping("/content/{fileName}")
     @SneakyThrows
-    public void getPostMedia(@PathVariable String fileName, HttpServletResponse response){
+    public void getPostMedia(@PathVariable String fileName, HttpServletResponse response) {
         File file = postService.getContent(fileName);
         response.setContentType(Files.probeContentType(file.toPath()));
         Files.copy(file.toPath(), response.getOutputStream());

@@ -1,11 +1,9 @@
 package com.example.demo.model.dto;
-
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
-public class UserLoginDTO {
-    private String username;
-    private String password;
+public record UserLoginDTO(String username, String password){
+    public String getUsername() {
+        return username;
+    }
+    public String getPassword() {
+        return password;
+    }
 }

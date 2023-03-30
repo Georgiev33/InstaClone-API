@@ -5,7 +5,6 @@ import com.example.demo.model.dto.UserRegistrationDTO;
 import com.example.demo.model.entity.User;
 import com.example.demo.model.exception.BadRequestException;
 import com.example.demo.repository.UserRepository;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,9 +46,8 @@ class UserServiceTest {
     @Test
     void mismatchedRepeatedPasswordShouldThrowBadRequest(){
         //given
-        UserRegistrationDTO registrationDTO = new UserRegistrationDTO();
-        registrationDTO.setPassword("password");
-        registrationDTO.setConfirmPassword("passwor");
+        UserRegistrationDTO registrationDTO = new UserRegistrationDTO(null,null,
+                "getPassword","passwor");
         //when
 
         //then
@@ -59,9 +57,8 @@ class UserServiceTest {
     @Test
     void matchingRepeatedPasswordShouldntThrowBadRequest(){
         //given
-        UserRegistrationDTO registrationDTO = new UserRegistrationDTO();
-        registrationDTO.setPassword("password");
-        registrationDTO.setConfirmPassword("password");
+        UserRegistrationDTO registrationDTO = new UserRegistrationDTO(null,null,
+                "getPassword","getPassword");
 
         //when
 
@@ -72,10 +69,8 @@ class UserServiceTest {
     @Test
     void existingUsernameShouldThrowBadRequest(){
         //given
-        UserRegistrationDTO registrationDTO = new UserRegistrationDTO();
-        registrationDTO.setPassword("password");
-        registrationDTO.setConfirmPassword("password");
-        registrationDTO.setUsername("venko");
+        UserRegistrationDTO registrationDTO = new UserRegistrationDTO("venko",null,
+                "getPassword","getPassword");
         // when
         when(userRepository.findUserByUsername(anyString())).thenReturn(Optional.of(new User()));
         // then
@@ -86,10 +81,8 @@ class UserServiceTest {
     @Test
     void nonexistentUsernameShouldntThrowBadRequest(){
         //given
-        UserRegistrationDTO registrationDTO = new UserRegistrationDTO();
-        registrationDTO.setPassword("password");
-        registrationDTO.setConfirmPassword("password");
-        registrationDTO.setUsername("venko");
+        UserRegistrationDTO registrationDTO = new UserRegistrationDTO("venko",null,
+                "getPassword","getPassword");
         // when
         when(userRepository.findUserByUsername(anyString())).thenReturn(Optional.empty());
         //then
@@ -100,11 +93,8 @@ class UserServiceTest {
     @Test
     void existingEmailShouldThrowBadRequest(){
         //given
-        UserRegistrationDTO registrationDTO = new UserRegistrationDTO();
-        registrationDTO.setPassword("password");
-        registrationDTO.setConfirmPassword("password");
-        registrationDTO.setEmail("testmail@gmail.com");
-        registrationDTO.setUsername("venko");
+        UserRegistrationDTO registrationDTO = new UserRegistrationDTO("venko","testmail@gmail.com",
+                "getPassword","getPassword");
         // when
         when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.of(new User()));
 
@@ -116,11 +106,8 @@ class UserServiceTest {
     @Test
     void nonexistentEmailShouldntThrowBadRequest(){
         //given
-        UserRegistrationDTO registrationDTO = new UserRegistrationDTO();
-        registrationDTO.setPassword("password");
-        registrationDTO.setConfirmPassword("password");
-        registrationDTO.setEmail("testmail@gmail.com");
-        registrationDTO.setUsername("venko");
+        UserRegistrationDTO registrationDTO = new UserRegistrationDTO("venko","testmail@gmail.com",
+                "getPassword","getPassword");
         // when
         when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.empty());
 
@@ -131,11 +118,8 @@ class UserServiceTest {
     @Test
     void sendVerificationEmailMethodShouldSendEmail(){
         //given
-        UserRegistrationDTO registrationDTO = new UserRegistrationDTO();
-        registrationDTO.setPassword("password");
-        registrationDTO.setConfirmPassword("password");
-        registrationDTO.setEmail("testemail@gmail.com");
-        registrationDTO.setUsername("venko");
+        UserRegistrationDTO registrationDTO = new UserRegistrationDTO("venko","testmail@gmail.com",
+                "getPassword","getPassword");
 
         //
         underTest.createUser(registrationDTO);
@@ -150,9 +134,7 @@ class UserServiceTest {
     @Test
     void nonExistentLoginUsernameShouldThrowBadRequest(){
         //given
-        UserLoginDTO userLoginDTO = new UserLoginDTO();
-        userLoginDTO.setUsername("venko");
-        userLoginDTO.setPassword("password");
+        UserLoginDTO userLoginDTO = new UserLoginDTO("venko", "getPassword");
         //when
             when(userRepository.findUserByUsername(anyString())).thenReturn(Optional.empty());
         //then
@@ -164,9 +146,7 @@ class UserServiceTest {
     @Test
     void existingLoginUsernameShouldntThrowBadRequest(){
         //given
-        UserLoginDTO userLoginDTO = new UserLoginDTO();
-        userLoginDTO.setUsername("venko");
-        userLoginDTO.setPassword("password");
+        UserLoginDTO userLoginDTO = new UserLoginDTO("venko", "getPassword");
         User user = new User();
         user.setPassword(userLoginDTO.getPassword());
         user.setVerified(true);
@@ -180,9 +160,7 @@ class UserServiceTest {
     @Test
     void wrongLoginPasswordShouldThrowBadRequest(){
         //given
-        UserLoginDTO userLoginDTO = new UserLoginDTO();
-        userLoginDTO.setUsername("venko");
-        userLoginDTO.setPassword("password");
+        UserLoginDTO userLoginDTO = new UserLoginDTO("venko", "getPassword");
         //when
         when(userRepository.findUserByUsername(anyString())).thenReturn(Optional.of(new User()));
         when(encoder.matches(any(), any())).thenReturn(false);
@@ -194,9 +172,7 @@ class UserServiceTest {
     @Test
     void correctLoginPasswordShouldntThrowBadRequest(){
         //given
-        UserLoginDTO userLoginDTO = new UserLoginDTO();
-        userLoginDTO.setUsername("venko");
-        userLoginDTO.setPassword("password");
+        UserLoginDTO userLoginDTO = new UserLoginDTO("venko", "getPassword");
         User user = new User();
         user.setVerified(true);
         //when
@@ -210,9 +186,7 @@ class UserServiceTest {
     @Test
     void unverifiedUserShouldThrowBadRequest(){
         //given
-        UserLoginDTO userLoginDTO = new UserLoginDTO();
-        userLoginDTO.setUsername("venko");
-        userLoginDTO.setPassword("password");
+        UserLoginDTO userLoginDTO = new UserLoginDTO("venko", "getPassword");
         User user = new User();
         user.setVerified(false);
         //when
@@ -227,9 +201,7 @@ class UserServiceTest {
     @Test
     void verifiedUserShouldntThrowBadRequest(){
         //given
-        UserLoginDTO userLoginDTO = new UserLoginDTO();
-        userLoginDTO.setUsername("venko");
-        userLoginDTO.setPassword("password");
+        UserLoginDTO userLoginDTO = new UserLoginDTO("venko", "getPassword");
         User user = new User();
         user.setVerified(true);
         //when

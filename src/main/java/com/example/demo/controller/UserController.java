@@ -9,12 +9,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import static com.example.demo.util.Constants.*;
+
 
 @RestController
 @RequestMapping("/user")
 public class UserController {
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    public UserController(@Autowired UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping("{verificationCode}")
     public ResponseEntity<String> verifyUser(@PathVariable String verificationCode) {
@@ -29,11 +34,11 @@ public class UserController {
     @PostMapping("/auth")
     public void login(@RequestBody UserLoginDTO userLoginDTO, HttpSession httpSession) {
         Long userId = userService.login(userLoginDTO);
-        if (httpSession.getAttribute("LOGGED") != null) {
-            throw new BadRequestException("You are already logged");
+        if (httpSession.getAttribute(LOGGED) != null) {
+            throw new BadRequestException(YOU_ARE_ALREADY_LOGGED);
         }
-        httpSession.setAttribute("LOGGED", true);
-        httpSession.setAttribute("USER_ID", userId);
+        httpSession.setAttribute(LOGGED, true);
+        httpSession.setAttribute(USER_ID, userId);
     }
 
     @PostMapping("/logout")
