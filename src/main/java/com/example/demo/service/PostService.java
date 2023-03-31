@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.model.dto.CreatePostDTO;
 import com.example.demo.model.dto.PostResponseDTO;
+import com.example.demo.model.entity.Hashtag;
 import com.example.demo.model.entity.Post;
 import com.example.demo.model.entity.PostContent;
 import com.example.demo.model.entity.User;
@@ -21,6 +22,7 @@ import java.time.LocalDateTime;
 
 import java.util.List;
 
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.example.demo.util.Constants.*;
@@ -33,19 +35,19 @@ public class PostService {
     private final PostRepository postRepository;
     private final ModelMapper modelMapper;
     private final PostContentRepository contentRepository;
-    private final TagService tagService;
+    private final HashTagService hashTagService;
 
     public PostService(@Autowired String serverPort, @Autowired FileService fileService,
                        @Autowired UserRepository userRepository, @Autowired PostRepository postRepository,
                        @Autowired ModelMapper modelMapper, @Autowired PostContentRepository contentRepository,
-                       @Autowired TagService tagService) {
+                       @Autowired HashTagService hashTagService) {
         this.serverPort = serverPort;
         this.fileService = fileService;
         this.userRepository = userRepository;
         this.postRepository = postRepository;
         this.modelMapper = modelMapper;
         this.contentRepository = contentRepository;
-        this.tagService = tagService;
+        this.hashTagService = hashTagService;
     }
 
 
@@ -61,14 +63,9 @@ public class PostService {
         post.setCaption(dto.getCaption());
         post.setUser(user);
 
-        tagService.addHashTags(dto.getHashtags(), post);
+        hashTagService.addHashTags(dto.getHashtags(), post);
 
         Post saved = postRepository.save(post);
-
-        PostResponseDTO responseDTO = modelMapper.map(saved, PostResponseDTO.class);
-        setResponseUrl(responseDTO, post.getId());
-        responseDTO.setHashtags(dto.getHashtags());
-
 
         for (MultipartFile file : dto.getContent()) {
             String fileName = fileService.saveFile(file, userId);
@@ -78,12 +75,7 @@ public class PostService {
             contentRepository.save(content);
         }
 
-        return responseDTO;
-    }
-
-    private void setResponseUrl(PostResponseDTO responseDTO, Long postId) {
-        String contentUrl = HTTP_LOCALHOST + serverPort + MEDIA_URI + postId;
-        responseDTO.setContentUrl(contentUrl);
+        return mapPostToPostResponseDto(saved);
     }
 
     public List<String> getAllPostUrls(long postId) {
@@ -97,5 +89,23 @@ public class PostService {
         return fileService.getFile(fileName);
     }
 
+    private void setResponseUrl(PostResponseDTO responseDTO, Long postId) {
+        String contentUrl = HTTP_LOCALHOST + serverPort + MEDIA_URI + postId;
+        responseDTO.setContentUrl(contentUrl);
+    }
+    private void setHashTags(PostResponseDTO responseDTO, Set<Hashtag> hashtags) {
+        for (Hashtag hashtag : hashtags) {
+            responseDTO.getHashtags().add(hashtag.getTagName());
+        }
+    }
 
+    private PostResponseDTO mapPostToPostResponseDto(Post post){
+        PostResponseDTO responseDTO = new PostResponseDTO();
+        responseDTO.setId(post.getId());
+        responseDTO.setCaption(post.getCaption());
+        responseDTO.setDateCreated(post.getDateCreated());
+        setResponseUrl(responseDTO, post.getId());
+        setHashTags(responseDTO, post.getHashtags());
+        return responseDTO;
+    }
 }
