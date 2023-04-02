@@ -3,9 +3,10 @@ package com.example.demo.model.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
+
 
 import java.util.*;
 
@@ -21,16 +22,17 @@ public class User implements UserDetails {
     private String password;
     private String verificationCode;
     private boolean isVerified;
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Post> posts;
-    @ManyToMany(cascade = {CascadeType.ALL})
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<Comment> comments;
+    @ManyToMany(cascade = { CascadeType.ALL })
     @JoinTable(
             name = "following",
             joinColumns = {@JoinColumn(name = "following_id")},
             inverseJoinColumns = {@JoinColumn(name = "user_id")}
     )
-    Set<User> followers = new HashSet<>();
-    //
+    private Set<User> followers = new HashSet<>();
     @ManyToMany(mappedBy = "followers")
     private Set<User> following = new HashSet<>();
 //    @Enumerated(EnumType.STRING)

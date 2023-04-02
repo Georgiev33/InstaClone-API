@@ -44,7 +44,7 @@ class PostServiceTest {
     @Mock
     private PostContentRepository contentRepository;
     @Mock
-    private TagService tagService;
+    private HashTagService hashTagService;
     @Value("${server.port}")
     private String serverPort;
     private PostService underTest;
@@ -52,7 +52,7 @@ class PostServiceTest {
     @BeforeEach
     void setUp() {
         underTest = new PostService(serverPort, fileService, userRepository,
-                postRepository, modelMapper, contentRepository, tagService);
+                postRepository, modelMapper, contentRepository, hashTagService);
     }
 
     @Test
@@ -120,7 +120,7 @@ class PostServiceTest {
         when(modelMapper.map(any(), any())).thenReturn(new PostResponseDTO());
         //then
         underTest.createPost(createPostDTO, 1L);
-        verify(tagService).addHashTags(anyList(), any(Post.class));
+        verify(hashTagService).addHashTags(anyList(), any(Post.class));
     }
 
     @Test
@@ -133,7 +133,7 @@ class PostServiceTest {
         when(modelMapper.map(any(), any())).thenReturn(new PostResponseDTO());
         //then
         underTest.createPost(createPostDTO, 1L);
-        verify(tagService, never()).addHashTags(anyList(), any(Post.class));
+        verify(hashTagService, never()).addHashTags(anyList(), any(Post.class));
     }
 
     @Test
