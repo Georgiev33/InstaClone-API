@@ -2,7 +2,6 @@ package com.example.demo.controller;
 
 import com.example.demo.model.dto.UserLoginDTO;
 import com.example.demo.model.dto.UserRegistrationDTO;
-import com.example.demo.model.exception.BadRequestException;
 import com.example.demo.service.UserService;
 import com.example.demo.util.UserServiceHelper;
 import jakarta.servlet.http.HttpSession;

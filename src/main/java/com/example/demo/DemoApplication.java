@@ -6,10 +6,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
 
 @SpringBootApplication()
 public class DemoApplication {
@@ -33,8 +29,5 @@ public class DemoApplication {
     public String serverPort(String serverPort) {
         return serverPort;
     }
-
-
-
 
 }
