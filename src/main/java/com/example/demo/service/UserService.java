@@ -3,42 +3,43 @@ package com.example.demo.service;
 import com.example.demo.model.dto.UserLoginDTO;
 import com.example.demo.model.dto.UserRegistrationDTO;
 import com.example.demo.model.entity.User;
-import com.example.demo.model.exception.BadRequestException;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.util.UserServiceHelper;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import static com.example.demo.util.Constants.*;
 
 @Service
-public class UserService {
+@RequiredArgsConstructor
+public class UserService implements UserDetailsService {
+
+
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final BCryptPasswordEncoder encoder;
     private final UserServiceHelper userServiceHelper;
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
 
-
-    public UserService(@Autowired UserRepository userRepository, @Autowired ModelMapper modelMapper,
-                       @Autowired BCryptPasswordEncoder encoder, @Autowired UserServiceHelper userServiceHelper) {
-        this.userRepository = userRepository;
-        this.modelMapper = modelMapper;
-        this.encoder = encoder;
-        this.userServiceHelper = userServiceHelper;
-    }
-
-    public Long login(UserLoginDTO userLoginDTO) {
-        User user = userServiceHelper.findUserByUsername(userLoginDTO.getUsername())
-                .orElseThrow(() -> new BadRequestException(BAD_CREDENTIALS));
-        if (!encoder.matches(userLoginDTO.getPassword(), user.getPassword())) {
-            throw new BadRequestException(BAD_CREDENTIALS);
-        }
-        if (!user.isVerified()) {
-            throw new BadRequestException(YOUR_ACCOUNT_ISN_T_VERIFIED);
-        }
-        return user.getId();
+    public Object[] login(UserLoginDTO userLoginDTO) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        userLoginDTO.getUsername(),
+                        userLoginDTO.getPassword()
+                )
+        );
+        User user = userRepository.findUserByUsername(userLoginDTO.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND));
+        String jwtToken = jwtService.generateToken(user);
+        return new Object[]{jwtToken, user.getId()};
     }
 
     public void createUser(UserRegistrationDTO userRegistrationDTO) {
@@ -46,6 +47,7 @@ public class UserService {
         User user = modelMapper.map(userRegistrationDTO, User.class);
         user.setPassword(encoder.encode(userRegistrationDTO.getPassword()));
         user.setVerificationCode(userServiceHelper.sendVerificationEmail(userRegistrationDTO));
+//        user.setRole(Role.USER);
         userRepository.save(user);
     }
 
@@ -54,5 +56,11 @@ public class UserService {
         User follower = userServiceHelper.findUserById(followerId);
         follower.getFollowing().add(followed);
         userRepository.save(follower);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) {
+        return userServiceHelper.findUserByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND));
     }
 }

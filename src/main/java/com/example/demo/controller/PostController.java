@@ -43,4 +43,9 @@ public class PostController {
         response.setContentType(Files.probeContentType(file.toPath()));
         Files.copy(file.toPath(), response.getOutputStream());
     }
+    @GetMapping("/kur")
+    @SneakyThrows
+    public String getPostMedia() {
+        return "kurec";
+    }
 }

@@ -1,9 +1,11 @@
 package com.example.demo.service;
 
 import com.example.demo.model.exception.BadRequestException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,6 +21,7 @@ import static com.example.demo.util.Constants.*;
 
 @Service
 @Slf4j
+
 public class FileService {
 
     private final List<String> AVAILABLE_EXTENSIONS = Arrays.asList(IMAGE_JPEG, IMAGE_PNG, VIDEO_MP_4, VIDEO_M_4_V);

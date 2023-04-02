@@ -4,6 +4,7 @@ import com.example.demo.model.dto.UserRegistrationDTO;
 import com.example.demo.model.entity.User;
 import com.example.demo.model.exception.BadRequestException;
 import com.example.demo.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.internal.bytebuddy.utility.RandomString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import java.util.Optional;
 import static com.example.demo.util.Constants.*;
 
 @Component
+@RequiredArgsConstructor
 public class UserServiceHelper {
 
     private final UserRepository userRepository;
@@ -24,12 +26,6 @@ public class UserServiceHelper {
 
     private final MailSender mailSender;
 
-    public UserServiceHelper(@Autowired UserRepository userRepository, @Autowired SimpleMailMessage simpleMailMessage,
-                             @Autowired MailSender mailSender) {
-        this.userRepository = userRepository;
-        this.simpleMailMessage = simpleMailMessage;
-        this.mailSender = mailSender;
-    }
 
     public String sendVerificationEmail(UserRegistrationDTO userRegistrationDTO) {
         String verificationCode = RandomString.make(INT_64);

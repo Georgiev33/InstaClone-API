@@ -28,19 +28,17 @@ public class UserController {
         return userServiceHelper.verifyUser(verificationCode);
     }
 
-    @PostMapping()
+    @PostMapping("/register")
     public void createUser(@RequestBody UserRegistrationDTO userRegistrationDTO) {
         userService.createUser(userRegistrationDTO);
     }
 
     @PostMapping("/auth")
-    public void login(@RequestBody UserLoginDTO userLoginDTO, HttpSession httpSession) {
-        Long userId = userService.login(userLoginDTO);
-        if (httpSession.getAttribute(LOGGED) != null) {
-            throw new BadRequestException(YOU_ARE_ALREADY_LOGGED);
-        }
-        httpSession.setAttribute(LOGGED, true);
-        httpSession.setAttribute(USER_ID, userId);
+    public ResponseEntity<String> login(@RequestBody UserLoginDTO userLoginDTO, HttpSession httpSession) {
+        Object[] tokeAndUserId = userService.login(userLoginDTO);
+       httpSession.setAttribute("USER_ID", tokeAndUserId[1]);
+       return ResponseEntity.ok((String)tokeAndUserId[0]);
+
     }
 
     @PostMapping("/logout")

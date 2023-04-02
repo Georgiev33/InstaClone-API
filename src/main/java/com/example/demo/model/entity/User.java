@@ -3,15 +3,16 @@ package com.example.demo.model.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity(name = "users")
 @Getter
 @Setter
-public class User {
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,13 +23,43 @@ public class User {
     private boolean isVerified;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Post> posts;
-    @ManyToMany(cascade = { CascadeType.ALL })
+    @ManyToMany(cascade = {CascadeType.ALL})
     @JoinTable(
             name = "following",
-            joinColumns = { @JoinColumn(name = "following_id") },
-            inverseJoinColumns = { @JoinColumn(name = "user_id") }
+            joinColumns = {@JoinColumn(name = "following_id")},
+            inverseJoinColumns = {@JoinColumn(name = "user_id")}
     )
     Set<User> followers = new HashSet<>();
+    //
     @ManyToMany(mappedBy = "followers")
     private Set<User> following = new HashSet<>();
+//    @Enumerated(EnumType.STRING)
+//    private Role role;
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("admin"));
+    }
+
+    //TODO
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    //TODO
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    //TODO
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }

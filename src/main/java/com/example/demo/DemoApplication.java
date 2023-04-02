@@ -4,13 +4,14 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 
-@SpringBootApplication(exclude = SecurityAutoConfiguration.class)
+@SpringBootApplication()
 public class DemoApplication {
 
     public static void main(String[] args) {
@@ -23,18 +24,17 @@ public class DemoApplication {
     }
 
     @Bean
-    public BCryptPasswordEncoder encoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
     public SimpleMailMessage templateSimpleMessage() {
         return new SimpleMailMessage();
     }
+
     @Bean(name = "server.port")
     @Value("${server.port}")
-    public String serverPort(String serverPort){
+    public String serverPort(String serverPort) {
         return serverPort;
     }
+
+
+
 
 }

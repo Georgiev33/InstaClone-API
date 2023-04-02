@@ -1,5 +1,6 @@
 package com.example.demo.model.exception;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
@@ -18,7 +19,8 @@ public class ExceptionController extends ResponseEntityExceptionHandler {
         return errorDTO;
     }
 
-    @ExceptionHandler(value = {NotFoundException.class})
+
+    @ExceptionHandler(value = {NotFoundException.class, UsernameNotFoundException.class})
     @ResponseStatus(code = HttpStatus.NOT_FOUND)
     private ExceptionDTO handleNotFound(Exception ex){
         ExceptionDTO errorDTO = new ExceptionDTO();
