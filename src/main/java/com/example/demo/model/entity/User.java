@@ -36,6 +36,9 @@ public class User implements UserDetails {
     @ManyToMany(mappedBy = "followers")
     private Set<User> following = new HashSet<>();
 
+    @OneToMany(mappedBy = "user")
+    Set<UserPostReaction> ratings;
+
     //    @Enumerated(EnumType.STRING)
 //    private Role role;
     @Override

@@ -4,10 +4,8 @@ import com.example.demo.model.dto.CreatePostDTO;
 import com.example.demo.model.dto.PostResponseDTO;
 import com.example.demo.service.PostService;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,7 +13,6 @@ import java.io.File;
 import java.nio.file.Files;
 import java.util.List;
 
-import static com.example.demo.util.Constants.USER_ID;
 
 @RestController
 @RequestMapping("/post")
@@ -27,7 +24,8 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<PostResponseDTO> createPost(@ModelAttribute CreatePostDTO dto, @RequestHeader("Authorization") String authToken) {
+    public ResponseEntity<PostResponseDTO> createPost(@ModelAttribute CreatePostDTO dto,
+                                                      @RequestHeader("Authorization") String authToken) {
         PostResponseDTO responseDTO = postService.createPost(dto,authToken);
         return ResponseEntity.ok(responseDTO);
     }
@@ -44,9 +42,8 @@ public class PostController {
         response.setContentType(Files.probeContentType(file.toPath()));
         Files.copy(file.toPath(), response.getOutputStream());
     }
-    @GetMapping("/kur")
-    @SneakyThrows
-    public String getPostMedia() {
-        return "kurec";
+    @PostMapping("/like/{postId}")
+    public void likePost (@PathVariable long postId, @RequestHeader("Authorization") String authToken){
+        postService.likePost(authToken, postId);
     }
 }

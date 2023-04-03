@@ -25,12 +25,17 @@ public class Post {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+    @OneToMany(mappedBy = "post")
+    Set<UserPostReaction> ratings;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "hashtags_posts",
             joinColumns = @JoinColumn(name = "post_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
+
+
     private Set<Hashtag> hashtags = new HashSet<>();
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Comment> comments;

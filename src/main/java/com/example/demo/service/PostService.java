@@ -2,19 +2,19 @@ package com.example.demo.service;
 
 import com.example.demo.model.dto.CreatePostDTO;
 import com.example.demo.model.dto.PostResponseDTO;
-import com.example.demo.model.entity.Hashtag;
-import com.example.demo.model.entity.Post;
-import com.example.demo.model.entity.PostContent;
-import com.example.demo.model.entity.User;
+import com.example.demo.model.entity.*;
 import com.example.demo.model.exception.BadRequestException;
 import com.example.demo.model.exception.NotFoundException;
 import com.example.demo.repository.PostContentRepository;
 import com.example.demo.repository.PostRepository;
+import com.example.demo.repository.UserPostReactionRepository;
+import com.example.demo.repository.UserRepository;
 import com.example.demo.util.UserServiceHelper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.File;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,6 +26,7 @@ import static com.example.demo.util.Constants.*;
 @Service
 @RequiredArgsConstructor
 public class PostService {
+    private static final int LIKE = 1;
     private final String serverPort;
     private final FileService fileService;
     private final UserServiceHelper userServiceHelper;
@@ -33,6 +34,8 @@ public class PostService {
     private final PostContentRepository contentRepository;
     private final HashTagService hashTagService;
     private final JwtService jwtService;
+    private final UserPostReactionRepository userPostReactionRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public PostResponseDTO createPost(CreatePostDTO dto, String authToken) {
@@ -72,20 +75,23 @@ public class PostService {
     public File getContent(String fileName) {
         return fileService.getFile(fileName);
     }
-    public Post findPostById(long postId){
+
+    public Post findPostById(long postId) {
         return postRepository.findById(postId).orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
     }
+
     private void setResponseUrl(PostResponseDTO responseDTO, Long postId) {
         String contentUrl = HTTP_LOCALHOST + serverPort + MEDIA_URI + postId;
         responseDTO.setContentUrl(contentUrl);
     }
+
     private void setHashTags(PostResponseDTO responseDTO, Set<Hashtag> hashtags) {
         for (Hashtag hashtag : hashtags) {
             responseDTO.getHashtags().add(hashtag.getTagName());
         }
     }
 
-    private PostResponseDTO mapPostToPostResponseDto(Post post){
+    private PostResponseDTO mapPostToPostResponseDto(Post post) {
         PostResponseDTO responseDTO = new PostResponseDTO();
         responseDTO.setId(post.getId());
         responseDTO.setCaption(post.getCaption());
@@ -94,4 +100,19 @@ public class PostService {
         setHashTags(responseDTO, post.getHashtags());
         return responseDTO;
     }
+
+    @Transactional
+    public void likePost(String authToken, long postId) {
+        long userId = jwtService.extractUserId(authToken);
+        User user = userServiceHelper.findUserById(userId);
+        Post post = findPostById(postId);
+        UserPostReaction userPostReaction = UserPostReaction.builder()
+                .id(new UserPostReactionKey(userId,postId))
+                .user(user)
+                .post(post)
+                .status(LIKE)
+                .build();
+        userPostReactionRepository.save(userPostReaction);
+    }
+
 }
