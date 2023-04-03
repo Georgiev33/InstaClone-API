@@ -18,13 +18,9 @@ import static com.example.demo.util.Constants.*;
 @Component
 @RequiredArgsConstructor
 public class UserServiceHelper {
-
     private final UserRepository userRepository;
-
     private final SimpleMailMessage simpleMailMessage;
-
     private final MailSender mailSender;
-
 
     public String sendVerificationEmail(UserRegistrationDTO userRegistrationDTO) {
         String verificationCode = RandomString.make(INT_64);
@@ -43,10 +39,6 @@ public class UserServiceHelper {
     public boolean doesUsernameExist(String username) {
         Optional<User> u = userRepository.findUserByUsername(username);
         return u.isPresent();
-    }
-
-    public User findUserById(long userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new BadRequestException(USER_NOT_FOUND));
     }
 
     public void validateUser(UserRegistrationDTO userRegistrationDTO) {
@@ -69,7 +61,11 @@ public class UserServiceHelper {
         userRepository.save(user);
         return ResponseEntity.ok(REGISTRATION_SUCCESSFULLY_VERIFIED);
     }
-    public Optional<User> findUserByUsername(String username) {
-        return userRepository.findUserByUsername(username);
+    public User findUserByUsername(String username) {
+        return userRepository.findUserByUsername(username).orElseThrow(() -> new BadRequestException(USER_NOT_FOUND));
+    }
+
+    public User findUserById(long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new BadRequestException(USER_NOT_FOUND));
     }
 }

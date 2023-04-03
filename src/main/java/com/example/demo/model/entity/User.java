@@ -26,7 +26,7 @@ public class User implements UserDetails {
     private List<Post> posts;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Comment> comments;
-    @ManyToMany(cascade = { CascadeType.ALL })
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(
             name = "following",
             joinColumns = {@JoinColumn(name = "following_id")},
@@ -35,7 +35,8 @@ public class User implements UserDetails {
     private Set<User> followers = new HashSet<>();
     @ManyToMany(mappedBy = "followers")
     private Set<User> following = new HashSet<>();
-//    @Enumerated(EnumType.STRING)
+
+    //    @Enumerated(EnumType.STRING)
 //    private Role role;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

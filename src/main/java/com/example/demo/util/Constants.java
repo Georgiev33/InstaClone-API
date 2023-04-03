@@ -31,8 +31,8 @@ public class Constants {
     public static final String EMPTY = " ";
     public static final String FILE_DOESN_T_EXIST = "File doesn't exist.";
     public static final String USER_ID = "USER_ID";
-    public static final String LOGGED = "LOGGED";
-    public static final String YOU_ARE_ALREADY_LOGGED = "You are already logged";
+
+    public static final String USER_CAN_T_FOLLOW_ITSELF = "User can`t follow itself";
     public static final String POST_NOT_FOUND = "Post not found.";
     public static final String TOKEN_MISSING_DATA = "Token missing data.";
 }
