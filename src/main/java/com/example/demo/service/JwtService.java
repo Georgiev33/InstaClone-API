@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.model.exception.BadRequestException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -7,16 +8,18 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import static com.example.demo.util.Constants.TOKEN_MISSING_DATA;
+
 @Service
 public class JwtService {
     private static final String SECRET_KEY = "25432A462D4A614E645267556B58703273357638782F413F4428472B4B625065";
+
     public String extractUsername(String jwtToken) {
         return extractClaim(jwtToken, Claims::getSubject);
     }
@@ -27,9 +30,6 @@ public class JwtService {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-    }
-    public String generateToken(UserDetails userDetails){
-        return generateToken(new HashMap<>(), userDetails);
     }
     public String generateToken(
             Map<String, Object> extraClaims,
@@ -65,5 +65,13 @@ public class JwtService {
     private Key getSignInKey(){
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+    public long extractUserId(String authToken){
+        String jwtToken = authToken.substring(7);
+        Claims claims = extractAllClaims(jwtToken);
+        if(claims.get("USER_ID", Long.class) == null){
+            throw new BadRequestException(TOKEN_MISSING_DATA);
+        }
+        return claims.get("USER_ID", Long.class);
     }
 }

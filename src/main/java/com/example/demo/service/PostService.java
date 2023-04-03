@@ -10,50 +10,34 @@ import com.example.demo.model.exception.BadRequestException;
 import com.example.demo.model.exception.NotFoundException;
 import com.example.demo.repository.PostContentRepository;
 import com.example.demo.repository.PostRepository;
-import com.example.demo.repository.UserRepository;
+import com.example.demo.util.UserServiceHelper;
 import jakarta.transaction.Transactional;
-
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.time.LocalDateTime;
-
 import java.util.List;
-
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.example.demo.util.Constants.*;
 
 @Service
+@RequiredArgsConstructor
 public class PostService {
     private final String serverPort;
     private final FileService fileService;
-    private final UserRepository userRepository;
+    private final UserServiceHelper userServiceHelper;
     private final PostRepository postRepository;
-    private final ModelMapper modelMapper;
     private final PostContentRepository contentRepository;
     private final HashTagService hashTagService;
-
-    public PostService(@Autowired String serverPort, @Autowired FileService fileService,
-                       @Autowired UserRepository userRepository, @Autowired PostRepository postRepository,
-                       @Autowired ModelMapper modelMapper, @Autowired PostContentRepository contentRepository,
-                       @Autowired HashTagService hashTagService) {
-        this.serverPort = serverPort;
-        this.fileService = fileService;
-        this.userRepository = userRepository;
-        this.postRepository = postRepository;
-        this.modelMapper = modelMapper;
-        this.contentRepository = contentRepository;
-        this.hashTagService = hashTagService;
-    }
-
+    private final JwtService jwtService;
 
     @Transactional
-    public PostResponseDTO createPost(CreatePostDTO dto, long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
+    public PostResponseDTO createPost(CreatePostDTO dto, String authToken) {
+        long userId = jwtService.extractUserId(authToken);
+        User user = userServiceHelper.findUserById(userId);
         if (dto.getContent() == null) {
             throw new BadRequestException(POST_CONTENT_IS_REQUIRED1);
         }
@@ -88,7 +72,9 @@ public class PostService {
     public File getContent(String fileName) {
         return fileService.getFile(fileName);
     }
-
+    public Post findPostById(long postId){
+        return postRepository.findById(postId).orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
+    }
     private void setResponseUrl(PostResponseDTO responseDTO, Long postId) {
         String contentUrl = HTTP_LOCALHOST + serverPort + MEDIA_URI + postId;
         responseDTO.setContentUrl(contentUrl);

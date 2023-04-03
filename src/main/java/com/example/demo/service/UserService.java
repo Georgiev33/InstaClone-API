@@ -14,14 +14,12 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
+import java.util.Map;
 import static com.example.demo.util.Constants.*;
 
 @Service
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
-
-
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final BCryptPasswordEncoder encoder;
@@ -29,7 +27,7 @@ public class UserService implements UserDetailsService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 
-    public Object[] login(UserLoginDTO userLoginDTO) {
+    public String login(UserLoginDTO userLoginDTO) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         userLoginDTO.getUsername(),
@@ -38,8 +36,7 @@ public class UserService implements UserDetailsService {
         );
         User user = userRepository.findUserByUsername(userLoginDTO.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND));
-        String jwtToken = jwtService.generateToken(user);
-        return new Object[]{jwtToken, user.getId()};
+        return jwtService.generateToken(Map.of("USER_ID", user.getId()), user);
     }
 
     public void createUser(UserRegistrationDTO userRegistrationDTO) {
@@ -51,8 +48,9 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
-    public void followUser(long followedUserId, long followerId) {
+    public void followUser(long followedUserId,String authToken) {
         User followed = userServiceHelper.findUserById(followedUserId);
+        long followerId = jwtService.extractUserId(authToken);
         User follower = userServiceHelper.findUserById(followerId);
         follower.getFollowing().add(followed);
         userRepository.save(follower);

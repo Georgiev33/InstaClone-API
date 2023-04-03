@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,8 +27,8 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<PostResponseDTO> createPost(@ModelAttribute CreatePostDTO dto, HttpSession session) {
-        PostResponseDTO responseDTO = postService.createPost(dto, (long) session.getAttribute(USER_ID));
+    public ResponseEntity<PostResponseDTO> createPost(@ModelAttribute CreatePostDTO dto, @RequestHeader("Authorization") String authToken) {
+        PostResponseDTO responseDTO = postService.createPost(dto,authToken);
         return ResponseEntity.ok(responseDTO);
     }
 

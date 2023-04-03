@@ -33,5 +33,6 @@ public class Constants {
     public static final String USER_ID = "USER_ID";
     public static final String LOGGED = "LOGGED";
     public static final String YOU_ARE_ALREADY_LOGGED = "You are already logged";
-
+    public static final String POST_NOT_FOUND = "Post not found.";
+    public static final String TOKEN_MISSING_DATA = "Token missing data.";
 }

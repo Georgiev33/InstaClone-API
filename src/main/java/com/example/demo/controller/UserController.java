@@ -33,21 +33,18 @@ public class UserController {
     }
 
     @PostMapping("/auth")
-    public ResponseEntity<String> login(@RequestBody UserLoginDTO userLoginDTO, HttpSession httpSession) {
-        Object[] tokeAndUserId = userService.login(userLoginDTO);
-       httpSession.setAttribute("USER_ID", tokeAndUserId[1]);
-       return ResponseEntity.ok((String)tokeAndUserId[0]);
-
+    public ResponseEntity<String> login(@RequestBody UserLoginDTO userLoginDTO) {
+        return ResponseEntity.ok(userService.login(userLoginDTO));
     }
 
-    @PostMapping("/logout")
-    public void logout(HttpSession httpSession) {
-        httpSession.invalidate();
-    }
+//    @PostMapping("/logout")
+//    public void logout(HttpSession httpSession) {
+//        httpSession.invalidate();
+//    }
 
     @PostMapping("/{followedUserId}")
-    public void followUser(@PathVariable long followedUserId, HttpSession httpSession) {
-        userService.followUser(followedUserId, (long) httpSession.getAttribute(USER_ID));
+    public void followUser(@PathVariable long followedUserId, @RequestHeader("Authorization") String authToken) {
+        userService.followUser(followedUserId, authToken);
     }
 
 }

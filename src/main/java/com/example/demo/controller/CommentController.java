@@ -15,8 +15,9 @@ public class CommentController {
         this.commentService = commentService;
     }
     @PostMapping()
-    public CommentResponseDTO createComment(@RequestBody CreateCommentDTO commentDTO, HttpSession session){
-        return commentService.createComment(commentDTO, (Long) session.getAttribute("USER_ID"));
+    public CommentResponseDTO createComment(@RequestBody CreateCommentDTO commentDTO,
+                                            @RequestHeader("Authorization") String authToken){
+        return commentService.createComment(commentDTO, authToken);
     }
 
 }
