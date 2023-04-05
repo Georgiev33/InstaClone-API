@@ -6,9 +6,9 @@ import com.example.demo.model.dto.UserWithUsernameAndIdDTO;
 import com.example.demo.model.entity.User;
 import com.example.demo.model.exception.BadRequestException;
 import com.example.demo.repository.UserRepository;
-import com.example.demo.util.UserServiceHelper;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.example.demo.util.Constants.*;
 
@@ -27,8 +28,8 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final BCryptPasswordEncoder encoder;
-    private final UserServiceHelper userServiceHelper;
     private final AuthenticationManager authenticationManager;
+    private final MailService mailService;
     private final JwtService jwtService;
 
     public String login(UserLoginDTO userLoginDTO) {
@@ -38,15 +39,15 @@ public class UserService implements UserDetailsService {
                         userLoginDTO.getPassword()
                 )
         );
-        User user = userServiceHelper.findUserByUsername(userLoginDTO.getUsername());
+        User user = findUserByUsername(userLoginDTO.getUsername());
         return jwtService.generateToken(Map.of("USER_ID", user.getId()), user);
     }
 
     public void createUser(UserRegistrationDTO userRegistrationDTO) {
-        userServiceHelper.validateUser(userRegistrationDTO);
+        validateUser(userRegistrationDTO);
         User user = modelMapper.map(userRegistrationDTO, User.class);
         user.setPassword(encoder.encode(userRegistrationDTO.getPassword()));
-        user.setVerificationCode(userServiceHelper.sendVerificationEmail(userRegistrationDTO));
+        user.setVerificationCode(mailService.sendVerificationEmail(userRegistrationDTO));
 //        user.setRole(Role.USER);
         userRepository.save(user);
     }
@@ -56,21 +57,20 @@ public class UserService implements UserDetailsService {
         if (followerId == followedUserId) {
             throw new BadRequestException(USER_CAN_T_FOLLOW_ITSELF);
         }
-        User followed = userServiceHelper.findUserById(followedUserId);
-        User follower = userServiceHelper.findUserById(followerId);
+        User followed = findUserById(followedUserId);
+        User follower = findUserById(followerId);
         followed.getFollowers().add(follower);
         userRepository.save(followed);
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) {
-        return userServiceHelper.findUserByUsername(username);
+        return findUserByUsername(username);
     }
 
     public List<UserWithUsernameAndIdDTO> getFollowers(String authToken) {
         long userId = jwtService.extractUserId(authToken);
-        return userServiceHelper
-                .findUserById(userId)
+        return findUserById(userId)
                 .getFollowers()
                 .stream()
                 .map(user -> new UserWithUsernameAndIdDTO(user.getUsername(), user.getId()))
@@ -79,11 +79,49 @@ public class UserService implements UserDetailsService {
 
     public List<UserWithUsernameAndIdDTO> getFollowing(String authToken) {
         long userId = jwtService.extractUserId(authToken);
-        return userServiceHelper
-                .findUserById(userId)
+        return findUserById(userId)
                 .getFollowing()
                 .stream()
                 .map(user -> new UserWithUsernameAndIdDTO(user.getUsername(), user.getId()))
                 .toList();
+    }
+
+
+    public ResponseEntity<String> verifyUser(String verificationCode) {
+        User user = userRepository.findUserByVerificationCodeAndVerificationCodeIsFalse(verificationCode)
+                .orElseThrow(() -> new BadRequestException(INVALID_VERIFICATION_CODE));
+        user.setVerified(true);
+        userRepository.save(user);
+        return ResponseEntity.ok(REGISTRATION_SUCCESSFULLY_VERIFIED);
+    }
+
+    public User findUserByUsername(String username) {
+        return userRepository.findUserByUsername(username).orElseThrow(() -> new BadRequestException(USER_NOT_FOUND));
+    }
+
+    public User findUserById(long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new BadRequestException(USER_NOT_FOUND));
+    }
+
+    private boolean doesEmailExist(String email) {
+        Optional<User> u = userRepository.findUserByEmail(email);
+        return u.isPresent();
+    }
+
+    private boolean doesUsernameExist(String username) {
+        Optional<User> u = userRepository.findUserByUsername(username);
+        return u.isPresent();
+    }
+    private void validateUser(UserRegistrationDTO userRegistrationDTO) {
+        if (!userRegistrationDTO.getPassword().equals(userRegistrationDTO.getConfirmPassword())) {
+            throw new BadRequestException(PASSWORDS_MUST_MATCH);
+        }
+        if (doesUsernameExist(userRegistrationDTO.getUsername())) {
+            throw new BadRequestException(USERNAME_ALREADY_EXISTS);
+        }
+
+        if (doesEmailExist(userRegistrationDTO.getEmail())) {
+            throw new BadRequestException(EMAIL_ALREADY_EXISTS);
+        }
     }
 }

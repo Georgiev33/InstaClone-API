@@ -8,7 +8,6 @@ import com.example.demo.model.entity.User;
 import com.example.demo.model.exception.BadRequestException;
 import com.example.demo.model.exception.NotFoundException;
 import com.example.demo.repository.CommentRepository;
-import com.example.demo.util.UserServiceHelper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -22,7 +21,7 @@ public class CommentService {
 
     private final PostService postService;
 
-    private final UserServiceHelper userServiceHelper;
+    private final UserService userService;
 
     private final ModelMapper modelMapper;
     private final JwtService jwtService;
@@ -31,7 +30,7 @@ public class CommentService {
     public CommentResponseDTO createComment(CreateCommentDTO createCommentDTO, String authToken) {
         long userId = jwtService.extractUserId(authToken);
         validateCommentData(createCommentDTO);
-        User author = userServiceHelper.findUserById(userId);
+        User author = userService.findUserById(userId);
         Post ownerPost = postService.findPostById(createCommentDTO.getPostId());
 
         Comment comment = new Comment();

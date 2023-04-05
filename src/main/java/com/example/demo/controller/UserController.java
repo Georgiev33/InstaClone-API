@@ -4,8 +4,7 @@ import com.example.demo.model.dto.UserLoginDTO;
 import com.example.demo.model.dto.UserRegistrationDTO;
 import com.example.demo.model.dto.UserWithUsernameAndIdDTO;
 import com.example.demo.service.UserService;
-import com.example.demo.util.UserServiceHelper;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,18 +13,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/user")
+@RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
-    private final UserServiceHelper userServiceHelper;
-
-    public UserController(@Autowired UserService userService, @Autowired UserServiceHelper userServiceHelper) {
-        this.userService = userService;
-        this.userServiceHelper = userServiceHelper;
-    }
 
     @GetMapping("{verificationCode}")
     public ResponseEntity<String> verifyUser(@PathVariable String verificationCode) {
-        return userServiceHelper.verifyUser(verificationCode);
+        return userService.verifyUser(verificationCode);
     }
 
     @PostMapping("/register")

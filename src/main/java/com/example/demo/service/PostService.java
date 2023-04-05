@@ -8,8 +8,6 @@ import com.example.demo.model.exception.NotFoundException;
 import com.example.demo.repository.PostContentRepository;
 import com.example.demo.repository.PostRepository;
 import com.example.demo.repository.UserPostReactionRepository;
-import com.example.demo.repository.UserRepository;
-import com.example.demo.util.UserServiceHelper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,18 +27,18 @@ public class PostService {
     private static final int LIKE = 1;
     private final String serverPort;
     private final FileService fileService;
-    private final UserServiceHelper userServiceHelper;
+    private final UserService userService;
     private final PostRepository postRepository;
     private final PostContentRepository contentRepository;
     private final HashTagService hashTagService;
     private final JwtService jwtService;
     private final UserPostReactionRepository userPostReactionRepository;
-    private final UserRepository userRepository;
+
 
     @Transactional
     public PostResponseDTO createPost(CreatePostDTO dto, String authToken) {
         long userId = jwtService.extractUserId(authToken);
-        User user = userServiceHelper.findUserById(userId);
+        User user = userService.findUserById(userId);
         if (dto.getContent() == null) {
             throw new BadRequestException(POST_CONTENT_IS_REQUIRED1);
         }
@@ -104,7 +102,7 @@ public class PostService {
     @Transactional
     public void likePost(String authToken, long postId) {
         long userId = jwtService.extractUserId(authToken);
-        User user = userServiceHelper.findUserById(userId);
+        User user = userService.findUserById(userId);
         Post post = findPostById(postId);
         UserPostReaction userPostReaction = UserPostReaction.builder()
                 .id(new UserPostReactionKey(userId,postId))
