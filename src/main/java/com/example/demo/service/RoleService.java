@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 public class RoleService {
     private final RoleRepository repository;
 
-    Role findRole(String roleName) {
-        return repository.findByAuthority(roleName).orElseThrow(() -> new NotFoundException("Role not found"));
+    Role findRole(String role) {
+        return repository.findByAuthority(role).orElseThrow(() -> new NotFoundException("Role not found"));
     }
 }
