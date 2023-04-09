@@ -39,20 +39,25 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     Set<UserPostReaction> ratings;
 
-    //    @Enumerated(EnumType.STRING)
-//    private Role role;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_autorities",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "autority_id")
+    )
+    Set<Role> roles;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("admin"));
+        return roles.stream().toList();
     }
 
-    //TODO
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
 
-    //TODO
+
     @Override
     public boolean isAccountNonLocked() {
         return true;
@@ -63,7 +68,7 @@ public class User implements UserDetails {
         return true;
     }
 
-    //TODO
+
     @Override
     public boolean isEnabled() {
         return true;
