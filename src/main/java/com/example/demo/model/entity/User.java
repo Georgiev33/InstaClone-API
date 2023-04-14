@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 
 import java.util.*;
@@ -41,18 +40,25 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private Set<Notification> notifications;
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_autorities",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "autority_id")
+    )
+    Set<Role> roles;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("admin"));
+        return roles.stream().toList();
     }
 
-    //TODO
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
 
-    //TODO
+
     @Override
     public boolean isAccountNonLocked() {
         return true;
@@ -63,7 +69,7 @@ public class User implements UserDetails {
         return true;
     }
 
-    //TODO
+
     @Override
     public boolean isEnabled() {
         return true;

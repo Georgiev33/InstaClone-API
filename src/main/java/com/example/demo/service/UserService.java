@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static com.example.demo.util.Constants.*;
 
@@ -31,6 +32,7 @@ public class UserService implements UserDetailsService {
     private final AuthenticationManager authenticationManager;
     private final MailService mailService;
     private final JwtService jwtService;
+    private final RoleService roleService;
 
     public String login(UserLoginDTO userLoginDTO) {
         authenticationManager.authenticate(
@@ -47,8 +49,8 @@ public class UserService implements UserDetailsService {
         validateUser(userRegistrationDTO);
         User user = modelMapper.map(userRegistrationDTO, User.class);
         user.setPassword(encoder.encode(userRegistrationDTO.getPassword()));
+        user.setRoles(Set.of(roleService.findRole("user")));
         user.setVerificationCode(mailService.sendVerificationEmail(userRegistrationDTO));
-//        user.setRole(Role.USER);
         userRepository.save(user);
     }
 
@@ -114,6 +116,7 @@ public class UserService implements UserDetailsService {
         Optional<User> u = userRepository.findUserByUsername(username);
         return u.isPresent();
     }
+
     private void validateUser(UserRegistrationDTO userRegistrationDTO) {
         if (!userRegistrationDTO.getPassword().equals(userRegistrationDTO.getConfirmPassword())) {
             throw new BadRequestException(PASSWORDS_MUST_MATCH);
