@@ -102,7 +102,9 @@ public class UserService implements UserDetailsService {
     public User findUserById(long userId) {
         return userRepository.findById(userId).orElseThrow(() -> new BadRequestException(USER_NOT_FOUND));
     }
-
+    public void validateUserById(long userId){
+        findUserById(userId);
+    }
     private boolean doesEmailExist(String email) {
         Optional<User> u = userRepository.findUserByEmail(email);
         return u.isPresent();

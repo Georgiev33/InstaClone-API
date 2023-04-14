@@ -7,10 +7,9 @@ import lombok.Setter;
 import java.util.HashSet;
 import java.util.Set;
 
-@Entity
+@Entity(name = "hashtags")
 @Getter
 @Setter
-@Table(name = "hashtags")
 public class Hashtag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

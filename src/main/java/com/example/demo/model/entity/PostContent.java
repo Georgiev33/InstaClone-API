@@ -4,8 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-@Entity
-@Table(name = "posts_content")
+@Entity(name = "posts_content")
 @Getter
 @Setter
 public class PostContent {

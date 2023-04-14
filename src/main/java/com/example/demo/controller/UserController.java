@@ -50,6 +50,4 @@ public class UserController {
     public List<UserWithUsernameAndIdDTO> getFollowing(@RequestHeader("Authorization") String authToken){
         return userService.getFollowing(authToken);
     }
-
-
 }

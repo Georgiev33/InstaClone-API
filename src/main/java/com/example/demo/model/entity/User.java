@@ -37,10 +37,10 @@ public class User implements UserDetails {
     private Set<User> following = new HashSet<>();
 
     @OneToMany(mappedBy = "user")
-    Set<UserPostReaction> ratings;
+    private Set<UserPostReaction> ratings;
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private Set<Notification> notifications;
 
-    //    @Enumerated(EnumType.STRING)
-//    private Role role;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("admin"));
