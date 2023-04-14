@@ -6,6 +6,8 @@ import com.example.demo.model.dto.UserWithUsernameAndIdDTO;
 import com.example.demo.model.entity.User;
 import com.example.demo.model.exception.BadRequestException;
 import com.example.demo.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
@@ -104,9 +106,11 @@ public class UserService implements UserDetailsService {
     public User findUserById(long userId) {
         return userRepository.findById(userId).orElseThrow(() -> new BadRequestException(USER_NOT_FOUND));
     }
-    public void validateUserById(long userId){
+
+    public void validateUserById(long userId) {
         findUserById(userId);
     }
+
     private boolean doesEmailExist(String email) {
         Optional<User> u = userRepository.findUserByEmail(email);
         return u.isPresent();
@@ -128,5 +132,11 @@ public class UserService implements UserDetailsService {
         if (doesEmailExist(userRegistrationDTO.getEmail())) {
             throw new BadRequestException(EMAIL_ALREADY_EXISTS);
         }
+    }
+
+    public void logout(HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        session.invalidate();
+        jwtService.invalidateToken(request.getHeader("Authorization"));
     }
 }

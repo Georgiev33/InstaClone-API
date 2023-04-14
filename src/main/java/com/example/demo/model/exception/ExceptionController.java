@@ -1,4 +1,6 @@
 package com.example.demo.model.exception;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +32,7 @@ public class ExceptionController extends ResponseEntityExceptionHandler {
         return errorDTO;
     }
 
-    @ExceptionHandler(value = {UnauthorizedException.class})
+    @ExceptionHandler(value = {UnauthorizedException.class, InvalidJwtTokenException.class})
     @ResponseStatus(code = HttpStatus.UNAUTHORIZED)
     private ExceptionDTO handleUnauthorized(Exception ex){
         ExceptionDTO errorDTO = new ExceptionDTO();

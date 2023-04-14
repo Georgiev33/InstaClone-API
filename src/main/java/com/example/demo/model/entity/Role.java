@@ -13,9 +13,6 @@ import java.util.Set;
 @Entity(name = "authorities")
 @NoArgsConstructor
 public class Role implements GrantedAuthority {
-    public Role(String role){
-        this.authority = role;
-    }
     @Id
     private Long id;
     private String authority;
