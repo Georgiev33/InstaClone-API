@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static com.example.demo.util.Constants.SUCCESSFULLY_LOGOUT;
+import static com.example.demo.util.Constants.SUCCESSFUL_LOGOUT;
 
 
 @RestController
@@ -33,12 +33,6 @@ public class UserController {
     @PostMapping("/auth")
     public ResponseEntity<String> login(@RequestBody UserLoginDTO userLoginDTO) {
         return ResponseEntity.ok(userService.login(userLoginDTO));
-    }
-
-    @PostMapping("/logout")
-    public String logout(HttpServletRequest request) {
-        userService.logout(request);
-        return SUCCESSFULLY_LOGOUT;
     }
 
     @PostMapping("/{followedUserId}")

@@ -32,10 +32,10 @@ public class Constants {
     public static final String FILE_DOESN_T_EXIST = "File doesn't exist.";
 
 
-    public static final String USER_CAN_T_FOLLOW_ITSELF = "User can`t follow itself";
+    public static final String USER_CAN_T_FOLLOW_ITSELF = "User can`t follow himself";
     public static final String POST_NOT_FOUND = "Post not found.";
     public static final String TOKEN_MISSING_DATA = "Token missing data.";
     public static final String ACCESS_DENIED = "Access denied";
-    public static final String SUCCESSFULLY_LOGOUT = "Successfully logout";
+    public static final String SUCCESSFUL_LOGOUT = "Successfully logged out.";
     public static final String YOUR_TOKEN_IS_EXPIRED = "Your token is expired";
 }

@@ -44,11 +44,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
         jwtToken = authHeader.substring(7);
-        try {
-            username = jwtService.extractUsername(jwtToken);
-        } catch (ExpiredJwtException ex) {
-            throw new InvalidJwtTokenException(YOUR_TOKEN_IS_EXPIRED);
-        }
+
+        username = jwtService.extractUsername(jwtToken);
+
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);

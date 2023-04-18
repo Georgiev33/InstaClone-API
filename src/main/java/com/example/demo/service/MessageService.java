@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
+import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.KafkaAdmin;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ public class MessageService {
     private final KafkaAdmin kafkaAdmin;
     private final Properties chatHistoryConsumerProperties;
     private final NotificationRepository notificationRepository;
+
 
     public void sendMessage(String message, long receiverId, String token) {
         User receiver = userService.findUserById(receiverId);

@@ -2,9 +2,10 @@ package com.example.demo.repository;
 
 import com.example.demo.model.entity.BlackListToken;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
-
-public interface BlackListedToken extends JpaRepository<BlackListToken, String> {
+@Repository
+public interface BlackListedTokenRepository extends JpaRepository<BlackListToken, String> {
     Optional<BlackListToken> getBlackListTokensByToken(String token);
 }

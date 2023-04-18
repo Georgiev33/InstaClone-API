@@ -3,7 +3,7 @@ package com.example.demo.service;
 import com.example.demo.model.entity.BlackListToken;
 import com.example.demo.model.exception.BadRequestException;
 import com.example.demo.model.exception.InvalidJwtTokenException;
-import com.example.demo.repository.BlackListedToken;
+import com.example.demo.repository.BlackListedTokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -24,11 +24,11 @@ import static com.example.demo.util.Constants.TOKEN_MISSING_DATA;
 @Service
 @RequiredArgsConstructor
 public class JwtService {
-    private final BlackListedToken blackListedToken;
+    private final BlackListedTokenRepository blackListedTokenRepository;
     private static final String SECRET_KEY = "25432A462D4A614E645267556B58703273357638782F413F4428472B4B625065";
 
     public void invalidateToken(String token) {
-        blackListedToken.save(new BlackListToken(token.substring(7)));
+        blackListedTokenRepository.save(new BlackListToken(token.substring(7)));
     }
 
     public String extractUsername(String jwtToken) {
@@ -59,7 +59,7 @@ public class JwtService {
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         String username = extractUsername(token);
-        blackListedToken.getBlackListTokensByToken(token)
+        blackListedTokenRepository.getBlackListTokensByToken(token)
                 .map(foundToken -> {
                     throw new InvalidJwtTokenException(ACCESS_DENIED);
                 });
