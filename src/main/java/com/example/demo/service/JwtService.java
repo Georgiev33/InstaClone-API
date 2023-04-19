@@ -2,7 +2,6 @@ package com.example.demo.service;
 
 import com.example.demo.model.entity.BlackListToken;
 import com.example.demo.model.exception.BadRequestException;
-import com.example.demo.model.exception.InvalidJwtTokenException;
 import com.example.demo.repository.BlackListedTokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -18,7 +17,6 @@ import java.util.Date;
 import java.util.Map;
 import java.util.function.Function;
 
-import static com.example.demo.util.Constants.ACCESS_DENIED;
 import static com.example.demo.util.Constants.TOKEN_MISSING_DATA;
 
 @Service
@@ -59,11 +57,9 @@ public class JwtService {
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         String username = extractUsername(token);
-        blackListedTokenRepository.getBlackListTokensByToken(token)
-                .map(foundToken -> {
-                    throw new InvalidJwtTokenException(ACCESS_DENIED);
-                });
-        return userDetails.getUsername().equals(username) && !isTokenExpired(token);
+        return blackListedTokenRepository.getBlackListTokensByToken(token).isEmpty()
+                && userDetails.getUsername().equals(username)
+                && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {

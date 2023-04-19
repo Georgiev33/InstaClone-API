@@ -1,9 +1,7 @@
 package com.example.demo.config;
 
-import com.example.demo.model.exception.InvalidJwtTokenException;
 import com.example.demo.service.JwtService;
 import com.sun.istack.NotNull;
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,16 +17,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-import static com.example.demo.util.Constants.YOUR_TOKEN_IS_EXPIRED;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
-
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
     private static final String BEARER = "Bearer ";
-
     @Override
     protected void doFilterInternal(
             @NotNull HttpServletRequest request,
@@ -44,10 +39,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
         jwtToken = authHeader.substring(7);
-
         username = jwtService.extractUsername(jwtToken);
-
-
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
             if (jwtService.isTokenValid(jwtToken, userDetails)) {

@@ -4,6 +4,8 @@ import com.example.demo.model.dto.NotificationResponseDTO;
 import com.example.demo.model.entity.Notification;
 import com.example.demo.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.async.DeferredResult;
 
@@ -18,27 +20,35 @@ public class NotificationService {
     private final JwtService jwtService;
     private final ExecutorService executorService;
     private final NotificationRepository notificationRepository;
+
     public DeferredResult<List<NotificationResponseDTO>> getNotifications(String authToken) {
         DeferredResult<List<NotificationResponseDTO>> deferredResult = new DeferredResult<>();
+        SecurityContext originalSecurityContext = SecurityContextHolder.getContext();
 
-        executorService.execute(() -> {
+        Runnable setResult = () -> {
             try {
-                List<NotificationResponseDTO> responseDTOS = pollForNotifications(authToken, 60);
+                SecurityContextHolder.setContext(originalSecurityContext);
+                List<NotificationResponseDTO> responseDTOS = pollForNotifications(authToken, 10);
                 deferredResult.setResult(responseDTOS);
 
             } catch (InterruptedException e) {
                 deferredResult.setErrorResult(e);
+            } finally {
+                SecurityContextHolder.clearContext();
             }
-        });
+        };
+        executorService.execute(setResult);
+
         return deferredResult;
     }
-    private List<NotificationResponseDTO> pollForNotifications(String authToken, long timeout) throws InterruptedException{
+
+    private List<NotificationResponseDTO>
+    pollForNotifications(String authToken, long timeout) throws InterruptedException {
         long userId = jwtService.extractUserId(authToken);
         long startTime = System.currentTimeMillis();
         long endTime = startTime + TimeUnit.SECONDS.toMillis(timeout);
 
-
-        while(System.currentTimeMillis() < endTime){
+        while (System.currentTimeMillis() < endTime) {
 
             List<Notification> notifications = notificationRepository.findAllByUserId(userId);
             if (notifications != null && !notifications.isEmpty()) {
@@ -47,10 +57,10 @@ public class NotificationService {
 
                 return notifications
                         .stream()
-                        .map(n -> new NotificationResponseDTO(n.getNotification(), n.getDateCreated())).toList();
-
+                        .map(n -> new NotificationResponseDTO(n.getNotification(), n.getDateCreated()))
+                        .toList();
             }
-            Thread.sleep(500);
+            Thread.sleep(1000);
         }
         return Collections.emptyList();
     }

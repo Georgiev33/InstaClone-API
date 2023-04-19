@@ -16,8 +16,10 @@ import java.util.List;
 @RequestMapping("/notify")
 public class NotificationController {
     private final NotificationService notificationService;
+
     @GetMapping
-    public DeferredResult<List<NotificationResponseDTO>> getNotifications(@RequestHeader("Authorization") String authToken){
+    public DeferredResult<List<NotificationResponseDTO>>
+    getNotifications(@RequestHeader("Authorization") String authToken) {
         return notificationService.getNotifications(authToken);
     }
 }
