@@ -42,8 +42,8 @@ public class PostController {
         response.setContentType(Files.probeContentType(file.toPath()));
         Files.copy(file.toPath(), response.getOutputStream());
     }
-    @PostMapping("/like/{postId}")
-    public void likePost (@PathVariable long postId, @RequestHeader("Authorization") String authToken){
-        postService.likePost(authToken, postId);
+    @PostMapping("/react/{postId}")
+    public void likePost (@PathVariable long postId, @RequestHeader("Authorization") String authToken, @RequestParam boolean status){
+        postService.likePost(authToken, postId, status);
     }
 }

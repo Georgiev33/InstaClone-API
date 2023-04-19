@@ -22,5 +22,5 @@ public class UserPostReaction {
     @MapsId("userId")
     @JoinColumn(name = "user_id")
     private User user;
-    private int status;
+    private boolean status;
 }

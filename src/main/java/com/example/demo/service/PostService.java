@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -100,17 +101,29 @@ public class PostService {
     }
 
     @Transactional
-    public void likePost(String authToken, long postId) {
+    public void likePost(String authToken, long postId, boolean status) {
         long userId = jwtService.extractUserId(authToken);
         User user = userService.findUserById(userId);
         Post post = findPostById(postId);
+
+        if(deleteReactionIfStatusMatches(userId, postId, status)){
+            return;
+        }
         UserPostReaction userPostReaction = UserPostReaction.builder()
                 .id(new UserPostReactionKey(userId,postId))
                 .user(user)
                 .post(post)
-                .status(LIKE)
+                .status(status)
                 .build();
         userPostReactionRepository.save(userPostReaction);
     }
 
+    private boolean deleteReactionIfStatusMatches(long userId, long postId, boolean status){
+        Optional<UserPostReaction> reaction = userPostReactionRepository.findById(new UserPostReactionKey(userId, postId));
+        if (reaction.isPresent() && reaction.get().isStatus() == status) {
+            userPostReactionRepository.delete(reaction.get());
+            return true;
+        }
+        return false;
+    }
 }

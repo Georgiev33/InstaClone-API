@@ -4,7 +4,6 @@ import com.example.demo.model.dto.UserLoginDTO;
 import com.example.demo.model.dto.UserRegistrationDTO;
 import com.example.demo.model.dto.UserWithUsernameAndIdDTO;
 import com.example.demo.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
