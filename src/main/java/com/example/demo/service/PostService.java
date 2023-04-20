@@ -5,11 +5,13 @@ import com.example.demo.model.dto.PostResponseDTO;
 import com.example.demo.model.entity.*;
 import com.example.demo.model.exception.BadRequestException;
 import com.example.demo.model.exception.NotFoundException;
+import com.example.demo.repository.NotificationRepository;
 import com.example.demo.repository.PostContentRepository;
 import com.example.demo.repository.PostRepository;
 import com.example.demo.repository.UserPostReactionRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.aspectj.weaver.ast.Not;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,7 +27,6 @@ import static com.example.demo.util.Constants.*;
 @Service
 @RequiredArgsConstructor
 public class PostService {
-    private static final int LIKE = 1;
     private final String serverPort;
     private final FileService fileService;
     private final UserService userService;
@@ -34,7 +35,7 @@ public class PostService {
     private final HashTagService hashTagService;
     private final JwtService jwtService;
     private final UserPostReactionRepository userPostReactionRepository;
-
+    private final NotificationRepository notificationRepository;
 
     @Transactional
     public PostResponseDTO createPost(CreatePostDTO dto, String authToken) {
@@ -48,7 +49,9 @@ public class PostService {
         post.setDateCreated(LocalDateTime.now());
         post.setCaption(dto.getCaption());
         post.setUser(user);
-
+        if(dto.getTaggedUsers() != null || !dto.getTaggedUsers().isEmpty()) {
+            addTaggedUsers(post, dto);
+        }
         hashTagService.addHashTags(dto.getHashtags(), post);
 
         Post saved = postRepository.save(post);
@@ -62,6 +65,18 @@ public class PostService {
         }
 
         return mapPostToPostResponseDto(saved);
+    }
+
+    private void addTaggedUsers(Post post, CreatePostDTO dto) {
+        for (String taggedUser : dto.getTaggedUsers()) {
+            User user = userService.findUserByUsername(taggedUser);
+            post.getUserTags().add(user);
+            Notification notification = new Notification();
+            notification.setUser(user);
+            notification.setDateCreated(LocalDateTime.now());
+            notification.setNotification(post.getUser().getUsername() + " tagged you in his post.");
+            notificationRepository.save(notification);
+        }
     }
 
     public List<String> getAllPostUrls(long postId) {

@@ -32,10 +32,13 @@ public class User implements UserDetails {
             inverseJoinColumns = {@JoinColumn(name = "user_id")}
     )
     private Set<User> followers = new HashSet<>();
-    @ManyToMany(mappedBy = "followers")
+    @ManyToMany(mappedBy = "taggedUsers", fetch = FetchType.LAZY)
+    private Set<Comment> taggedComments;
+    @ManyToMany(mappedBy = "userTags", fetch = FetchType.LAZY)
+    private Set<Post> taggedPosts = new HashSet<>();
+    @ManyToMany(mappedBy = "followers", fetch = FetchType.LAZY)
     private Set<User> following = new HashSet<>();
-
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private Set<UserPostReaction> ratings;
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private Set<Notification> notifications;
@@ -46,7 +49,7 @@ public class User implements UserDetails {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "autority_id")
     )
-    Set<Role> roles;
+    private Set<Role> roles;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

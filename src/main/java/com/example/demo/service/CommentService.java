@@ -3,28 +3,29 @@ package com.example.demo.service;
 import com.example.demo.model.dto.CommentResponseDTO;
 import com.example.demo.model.dto.CreateCommentDTO;
 import com.example.demo.model.entity.Comment;
+import com.example.demo.model.entity.Notification;
 import com.example.demo.model.entity.Post;
 import com.example.demo.model.entity.User;
 import com.example.demo.model.exception.BadRequestException;
 import com.example.demo.model.exception.NotFoundException;
 import com.example.demo.repository.CommentRepository;
+import com.example.demo.repository.NotificationRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class CommentService {
     private final CommentRepository commentRepository;
-
     private final PostService postService;
-
     private final UserService userService;
-
     private final ModelMapper modelMapper;
     private final JwtService jwtService;
+    private final NotificationRepository notificationRepository;
 
     @Transactional
     public CommentResponseDTO createComment(CreateCommentDTO createCommentDTO, String authToken) {
@@ -39,7 +40,9 @@ public class CommentService {
         comment.setCreatedAt(LocalDateTime.now());
         comment.setContent(createCommentDTO.getContent());
         ownerPost.getComments().add(comment);
-
+        if(createCommentDTO.getTaggedUsers() != null && !createCommentDTO.getTaggedUsers().isEmpty()){
+            addTaggedUsers(createCommentDTO.getTaggedUsers(), comment);
+        }
 
        if(createCommentDTO.getRepliedCommentId() != null){
            Comment parentComment = findById(createCommentDTO.getRepliedCommentId(),
@@ -52,6 +55,18 @@ public class CommentService {
        }
        commentRepository.save(comment);
         return modelMapper.map(comment, CommentResponseDTO.class);
+    }
+
+    private void addTaggedUsers(List<String> taggedUsers, Comment comment) {
+        for (String taggedUser : taggedUsers) {
+            User user = userService.findUserByUsername(taggedUser);
+            comment.getTaggedUsers().add(user);
+            Notification notification = new Notification();
+            notification.setUser(user);
+            notification.setDateCreated(LocalDateTime.now());
+            notification.setNotification(comment.getUser().getUsername() + " tagged you in his comment.");
+            notificationRepository.save(notification);
+        }
     }
 
     private Comment findById(Long commentId, String exceptionMessage) {

@@ -15,4 +15,5 @@ public class PostResponseDTO {
     private String caption;
     private LocalDateTime dateCreated;
     private List<String> hashtags = new ArrayList<>();
+    private List<String> userTags = new ArrayList<>();
 }
