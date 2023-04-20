@@ -2,10 +2,8 @@ package com.example.demo.service;
 
 import com.example.demo.model.Postable;
 import com.example.demo.model.entity.Hashtag;
-import com.example.demo.model.entity.Post;
 import com.example.demo.repository.HashtagRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
