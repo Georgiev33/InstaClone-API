@@ -36,13 +36,14 @@ public class User implements UserDetails {
     private Set<Comment> taggedComments;
     @ManyToMany(mappedBy = "userTags", fetch = FetchType.LAZY)
     private Set<Post> taggedPosts = new HashSet<>();
+    @ManyToMany(mappedBy = "userTags", fetch = FetchType.LAZY)
+    private Set<Post> taggedStories = new HashSet<>();
     @ManyToMany(mappedBy = "followers", fetch = FetchType.LAZY)
     private Set<User> following = new HashSet<>();
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private Set<UserPostReaction> ratings;
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private Set<Notification> notifications;
-
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_autorities",

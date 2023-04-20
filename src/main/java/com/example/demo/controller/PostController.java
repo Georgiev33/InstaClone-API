@@ -4,6 +4,7 @@ import com.example.demo.model.dto.CreatePostDTO;
 import com.example.demo.model.dto.PostResponseDTO;
 import com.example.demo.service.PostService;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,17 +17,14 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/post")
+@RequiredArgsConstructor
 public class PostController {
     private final PostService postService;
-
-    public PostController(@Autowired PostService postService) {
-        this.postService = postService;
-    }
 
     @PostMapping
     public ResponseEntity<PostResponseDTO> createPost(@ModelAttribute CreatePostDTO dto,
                                                       @RequestHeader("Authorization") String authToken) {
-        PostResponseDTO responseDTO = postService.createPost(dto,authToken);
+        PostResponseDTO responseDTO = postService.createPost(dto, authToken);
         return ResponseEntity.ok(responseDTO);
     }
 
@@ -42,8 +40,11 @@ public class PostController {
         response.setContentType(Files.probeContentType(file.toPath()));
         Files.copy(file.toPath(), response.getOutputStream());
     }
+
     @PostMapping("/react/{postId}")
-    public void likePost (@PathVariable long postId, @RequestHeader("Authorization") String authToken, @RequestParam boolean status){
+    public void likePost(@PathVariable long postId,
+                         @RequestHeader("Authorization") String authToken,
+                         @RequestParam boolean status) {
         postService.likePost(authToken, postId, status);
     }
 }

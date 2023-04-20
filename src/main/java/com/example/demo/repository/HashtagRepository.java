@@ -8,5 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface HashtagRepository extends JpaRepository<Hashtag, Long> {
-     Hashtag findByTagName(String hashtag);
+     Optional<Hashtag> findByTagName(String hashtag);
 }

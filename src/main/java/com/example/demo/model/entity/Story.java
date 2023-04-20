@@ -1,49 +1,47 @@
 package com.example.demo.model.entity;
+
 import com.example.demo.model.Postable;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Entity(name = "posts")
+@Entity(name = "stories")
 @Getter
 @Setter
-public class Post implements Postable {
+public class Story implements Postable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @OneToMany(mappedBy = "post")
-    private List<PostContent> contentUrls;
-    @Column(name = "caption")
-    private String caption;
+    @OneToMany(mappedBy = "story")
+    private List<StoryContent> contentUrls;
     @Column(name = "is_deleted")
     private boolean isDeleted;
     @Column(name = "date_created")
     private LocalDateTime dateCreated;
+    @Column(name =  "expiration_date")
+    private LocalDateTime expirationDate;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
-    @OneToMany(mappedBy = "post")
-    Set<UserPostReaction> ratings;
-
+    @OneToMany(mappedBy = "story")
+    Set<UserStoryReaction> reactions;
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-            name = "hashtags_posts",
-            joinColumns = @JoinColumn(name = "post_id"),
-            inverseJoinColumns = @JoinColumn(name = "tag_id")
+            name = "stories_hashtag",
+            joinColumns = @JoinColumn(name = "story_id"),
+            inverseJoinColumns = @JoinColumn(name = "hashtag_id")
     )
     private Set<Hashtag> hashtags = new HashSet<>();
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-            name = "post_user_tag",
-            joinColumns = @JoinColumn(name = "post_id"),
+            name = "stories_user_tag",
+            joinColumns = @JoinColumn(name = "story_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private Set<User> userTags = new HashSet<>();
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<Comment> comments;
-
 }

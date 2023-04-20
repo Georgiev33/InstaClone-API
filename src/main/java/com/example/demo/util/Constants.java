@@ -15,9 +15,12 @@ public class Constants {
     public static final String HTTP_LOCALHOST = "http://localhost:";
     public static final String USER_NOT_FOUND = "User not found";
     public static final String POST_CONTENT = "/post/content/";
+    public static final String STORY_CONTENT = "/post/content/";
     public static final String POST_CONTENT_IS_REQUIRED1 = "Post content is required.";
+    public static final String STORY_CONTENT_IS_REQUIRED1 = "Story content is required.";
     public static final String POST_CONTENT_IS_REQUIRED = "Post content is required.";
     public static final String INVALID_POST_ID = "Invalid postId";
+    public static final String INVALID_STORY_ID = "Invalid storyId";
     public static final String INVALID_FILE_TYPE = "Invalid file type.";
     public static final String IMAGE_JPEG = "image/jpeg";
     public static final String IMAGE_PNG = "image/png";
@@ -34,6 +37,7 @@ public class Constants {
 
     public static final String USER_CAN_T_FOLLOW_ITSELF = "User can`t follow himself";
     public static final String POST_NOT_FOUND = "Post not found.";
+    public static final String STORY_NOT_FOUND = "Story not found.";
     public static final String TOKEN_MISSING_DATA = "Token missing data.";
     public static final String ACCESS_DENIED = "Access denied";
     public static final String SUCCESSFUL_LOGOUT = "Successfully logged out.";
