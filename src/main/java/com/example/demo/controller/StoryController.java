@@ -11,26 +11,16 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.nio.file.Files;
-import java.util.List;
-
-
 @RestController
 @RequestMapping("/story")
 @RequiredArgsConstructor
 public class StoryController {
     private final StoryService storyService;
 
-
     @PostMapping
     public ResponseEntity<StoryResponseDTO> createStory(@ModelAttribute CreateStoryDTO dto,
-                                                      @RequestHeader("Authorization") String authToken) {
-        StoryResponseDTO responseDTO = storyService.createStory(dto,authToken);
-        return ResponseEntity.ok(responseDTO);
-    }
-
-    @GetMapping("/media/{storyId}")
-    public List<String> getStoryMedia(@PathVariable long storyId) {
-        return storyService.getAllStoryUrls(storyId);
+                                                        @RequestHeader("Authorization") String authToken) {
+        return ResponseEntity.ok(storyService.createStory(dto, authToken));
     }
 
     @GetMapping("/content/{fileName}")
@@ -40,10 +30,11 @@ public class StoryController {
         response.setContentType(Files.probeContentType(file.toPath()));
         Files.copy(file.toPath(), response.getOutputStream());
     }
+
     @PostMapping("/react/{storyId}")
     public void likeStory(@PathVariable long storyId,
-                         @RequestHeader("Authorization") String authToken,
-                         @RequestParam boolean status) {
+                          @RequestHeader("Authorization") String authToken,
+                          @RequestParam boolean status) {
         storyService.likeStory(authToken, storyId, status);
     }
 }

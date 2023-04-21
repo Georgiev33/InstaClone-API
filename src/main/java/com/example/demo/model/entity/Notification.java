@@ -1,15 +1,15 @@
 package com.example.demo.model.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 
 import java.time.LocalDateTime;
-
-@Entity(name = "notifications")
 @Getter
-@Setter
+@Entity(name = "notifications")
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @RestControllerAdvice
 public class ExceptionController extends ResponseEntityExceptionHandler {
-    @ExceptionHandler(value = {BadRequestException.class})
+    @ExceptionHandler(value = {BadRequestException.class, InvalidMultipartFileException.class})
     @ResponseStatus(code = HttpStatus.BAD_REQUEST)
     private ExceptionDTO handleBadRequest(Exception ex) {
         ExceptionDTO errorDTO = new ExceptionDTO();

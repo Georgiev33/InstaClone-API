@@ -24,6 +24,7 @@ public class PostController {
     public ResponseEntity<PostResponseDTO> createPost(@ModelAttribute CreatePostDTO dto,
                                                       @RequestHeader("Authorization") String authToken) {
         PostResponseDTO responseDTO = postService.createPost(dto, authToken);
+
         return ResponseEntity.ok(responseDTO);
     }
 

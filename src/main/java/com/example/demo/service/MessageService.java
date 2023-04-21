@@ -42,11 +42,11 @@ public class MessageService {
         kafkaTemplate.send(topicName, sender.getUsername() + ":" + message);
 
 
-        Notification notification = new Notification();
-        notification.setNotification(sender.getUsername()
-                + " has sent you a new message: \n" + message);
-        notification.setUser(receiver);
-        notification.setDateCreated(LocalDateTime.now());
+        Notification notification = Notification.builder().notification(sender.getUsername()
+                        + " has sent you a new message: \n" + message)
+                .user(receiver)
+                .dateCreated(LocalDateTime.now())
+                .build();
         notificationRepository.save(notification);
     }
 
@@ -73,11 +73,11 @@ public class MessageService {
             desiredOffset = 0;
         }
 
-        consumer.seek(new TopicPartition(topicName, 0),desiredOffset);
+        consumer.seek(new TopicPartition(topicName, 0), desiredOffset);
         int counter = 0;
         ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(3000));
         for (ConsumerRecord<String, String> record : records) {
-            if(counter == limit){
+            if (counter == limit) {
                 break;
             }
             messageResponses.add(new MessageResponse(record.value()));

@@ -17,8 +17,7 @@ public class Constants {
     public static final String POST_CONTENT = "/post/content/";
     public static final String STORY_CONTENT = "/post/content/";
     public static final String POST_CONTENT_IS_REQUIRED1 = "Post content is required.";
-    public static final String STORY_CONTENT_IS_REQUIRED1 = "Story content is required.";
-    public static final String POST_CONTENT_IS_REQUIRED = "Post content is required.";
+    public static final String CONTENT_IS_REQUIRED1 = "Content is required.";
     public static final String INVALID_POST_ID = "Invalid postId";
     public static final String INVALID_STORY_ID = "Invalid storyId";
     public static final String INVALID_FILE_TYPE = "Invalid file type.";
@@ -42,4 +41,8 @@ public class Constants {
     public static final String ACCESS_DENIED = "Access denied";
     public static final String SUCCESSFUL_LOGOUT = "Successfully logged out.";
     public static final String YOUR_TOKEN_IS_EXPIRED = "Your token is expired";
+    public static final String TAGGED_YOU_IN_HIS_POST = " tagged you in his post";
+    public static final String TAGGED_YOU_IN_HIS_STORY = " tagged you in his story";
+    public static final String TAGGED_YOU_IN_HIS_COMMENT = " tagged you in his comment";
+
 }

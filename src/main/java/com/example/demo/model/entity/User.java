@@ -6,7 +6,6 @@ import lombok.Setter;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.GrantedAuthority;
 
-
 import java.util.*;
 
 @Entity(name = "users")

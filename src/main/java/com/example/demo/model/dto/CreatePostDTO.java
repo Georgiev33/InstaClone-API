@@ -4,11 +4,11 @@ import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 
-@Data
-public class CreatePostDTO {
-    private String caption;
-    private List<MultipartFile> content;
-    private List<String> hashtags;
-    private List<String> taggedUsers;
+
+public record CreatePostDTO(String caption,
+                            List<MultipartFile> content,
+                            Optional<List<String>> hashtags,
+                            Optional<List<String>> taggedUsers) {
 }

@@ -2,29 +2,29 @@ package com.example.demo.model.entity;
 
 import com.example.demo.model.Postable;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity(name = "stories")
 @Getter
-@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Story implements Postable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @OneToMany(mappedBy = "story")
-    private List<StoryContent> contentUrls;
     @Column(name = "is_deleted")
     private boolean isDeleted;
     @Column(name = "date_created")
     private LocalDateTime dateCreated;
-    @Column(name =  "expiration_date")
+    @Column(name = "expiration_date")
     private LocalDateTime expirationDate;
+    @Column(name = "content_url")
+    private String contentUrl;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
@@ -36,12 +36,12 @@ public class Story implements Postable {
             joinColumns = @JoinColumn(name = "story_id"),
             inverseJoinColumns = @JoinColumn(name = "hashtag_id")
     )
-    private Set<Hashtag> hashtags = new HashSet<>();
+    private Set<Hashtag> hashtags;
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "stories_user_tag",
             joinColumns = @JoinColumn(name = "story_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private Set<User> userTags = new HashSet<>();
+    private Set<User> userTags;
 }

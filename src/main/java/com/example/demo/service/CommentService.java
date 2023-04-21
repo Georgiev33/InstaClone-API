@@ -17,6 +17,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.example.demo.util.Constants.TAGGED_YOU_IN_HIS_COMMENT;
+import static com.example.demo.util.Constants.TAGGED_YOU_IN_HIS_STORY;
+
 @Service
 @RequiredArgsConstructor
 public class CommentService {
@@ -61,10 +64,11 @@ public class CommentService {
         for (String taggedUser : taggedUsers) {
             User user = userService.findUserByUsername(taggedUser);
             comment.getTaggedUsers().add(user);
-            Notification notification = new Notification();
-            notification.setUser(user);
-            notification.setDateCreated(LocalDateTime.now());
-            notification.setNotification(comment.getUser().getUsername() + " tagged you in his comment.");
+            Notification notification = Notification.builder()
+                    .user(user)
+                    .dateCreated(LocalDateTime.now())
+                    .notification(comment.getUser().getUsername()+ TAGGED_YOU_IN_HIS_COMMENT)
+                    .build();
             notificationRepository.save(notification);
         }
     }
