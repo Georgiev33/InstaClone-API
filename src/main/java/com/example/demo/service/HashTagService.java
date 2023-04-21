@@ -14,9 +14,9 @@ import java.util.Optional;
 public class HashTagService {
     private final HashtagRepository hashtagRepository;
 
-    //add nonexistent tags to db, if they exist add them to posts' set
-    public void addHashTags(List<String> tagsToAdd, Postable post) {
-        for (String hashtagToAdd : tagsToAdd) {
+    public void addHashTags(Optional<List<String>> tagsToAdd, Postable post) {
+        if (tagsToAdd.isEmpty()) return;
+        for (String hashtagToAdd : tagsToAdd.get()) {
             Optional<Hashtag> hashtag = hashtagRepository.findByTagName(hashtagToAdd);
             post.getHashtags().add(hashtag.orElseGet(() -> createHashtag(hashtagToAdd)));
         }

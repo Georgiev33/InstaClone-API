@@ -17,14 +17,15 @@ public class Story implements Postable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @OneToMany(mappedBy = "story")
-    private List<StoryContent> contentUrls;
     @Column(name = "is_deleted")
     private boolean isDeleted;
     @Column(name = "date_created")
     private LocalDateTime dateCreated;
-    @Column(name =  "expiration_date")
+    @Column(name = "expiration_date")
     private LocalDateTime expirationDate;
+    @Column(name = "content_url")
+    private String contentUrl;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
