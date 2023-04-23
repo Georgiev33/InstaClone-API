@@ -3,29 +3,32 @@ package com.example.demo.service;
 import com.example.demo.model.dto.CreateStoryDTO;
 import com.example.demo.model.dto.StoryResponseDTO;
 import com.example.demo.model.entity.*;
+import com.example.demo.model.exception.BadRequestException;
 import com.example.demo.model.exception.NotFoundException;
 import com.example.demo.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Optional;
 
 import static com.example.demo.util.Constants.*;
 
 @Service
 @RequiredArgsConstructor
 public class StoryService {
+    private final String serverPort;
     private final FileService fileService;
     private final UserService userService;
     private final StoryRepository storyRepository;
+    private final StoryContentRepository contentRepository;
     private final HashTagService hashTagService;
     private final JwtService jwtService;
     private final UserStoryReactionRepository userStoryReactionRepository;
-    private final NotificationService notificationService;
 
     @Transactional
     public StoryResponseDTO createStory(CreateStoryDTO dto, String authToken) {
@@ -42,6 +45,13 @@ public class StoryService {
         hashTagService.addHashTags(dto.hashTags(), story);
         Story saved = storyRepository.save(story);
 
+        for (MultipartFile file : dto.content()) {
+            String fileName = fileService.saveFile(file, userId);
+            StoryContent content = new StoryContent();
+            content.setStory(story);
+            content.setContentUrl(HTTP_LOCALHOST + serverPort + STORY_CONTENT + fileName);
+            contentRepository.save(content);
+        }
         return mapStoryToStoryResponseDTO(saved);
     }
 
