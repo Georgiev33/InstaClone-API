@@ -18,7 +18,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.example.demo.util.Constants.TAGGED_YOU_IN_HIS_COMMENT;
-import static com.example.demo.util.Constants.TAGGED_YOU_IN_HIS_STORY;
 
 @Service
 @RequiredArgsConstructor
