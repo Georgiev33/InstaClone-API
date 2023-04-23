@@ -65,7 +65,9 @@ public class PostService {
         List<PostContent> postContents = contentRepository.findAllByPostId(postId)
                 .orElseThrow(() -> new BadRequestException(INVALID_POST_ID));
 
-        return postContents.stream().map(PostContent::getContentUrl).collect(Collectors.toList());
+        return postContents.stream()
+                .map(PostContent::getContentUrl)
+                .collect(Collectors.toList());
     }
 
     public File getContent(String fileName) {

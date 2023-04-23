@@ -13,8 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.example.demo.util.Constants.*;
 
@@ -25,7 +25,7 @@ public class StoryService {
     private final FileService fileService;
     private final UserService userService;
     private final StoryRepository storyRepository;
-    private final StoryContentRepository contentRepository;
+    private final NotificationService notificationService;
     private final HashTagService hashTagService;
     private final JwtService jwtService;
     private final UserStoryReactionRepository userStoryReactionRepository;
@@ -45,13 +45,6 @@ public class StoryService {
         hashTagService.addHashTags(dto.hashTags(), story);
         Story saved = storyRepository.save(story);
 
-        for (MultipartFile file : dto.content()) {
-            String fileName = fileService.saveFile(file, userId);
-            StoryContent content = new StoryContent();
-            content.setStory(story);
-            content.setContentUrl(HTTP_LOCALHOST + serverPort + STORY_CONTENT + fileName);
-            contentRepository.save(content);
-        }
         return mapStoryToStoryResponseDTO(saved);
     }
 
@@ -91,7 +84,8 @@ public class StoryService {
     }
 
     private boolean deleteReactionIfStatusMatches(long userId, long storyId, boolean status) {
-        Optional<UserStoryReaction> reaction = userStoryReactionRepository.findById(new UserStoryReactionKey(userId, storyId));
+        Optional<UserStoryReaction> reaction =
+                userStoryReactionRepository.findById(new UserStoryReactionKey(userId, storyId));
         if (reaction.isPresent() && reaction.get().isStatus() == status) {
             userStoryReactionRepository.delete(reaction.get());
             return true;
