@@ -1,6 +1,6 @@
 package com.example.demo.service;
 
-import com.example.demo.model.dto.UserRegistrationDTO;
+import com.example.demo.model.dto.User.UserRegistrationDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

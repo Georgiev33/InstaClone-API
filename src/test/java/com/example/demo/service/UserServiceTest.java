@@ -1,7 +1,7 @@
 package com.example.demo.service;
 
-import com.example.demo.model.dto.UserLoginDTO;
-import com.example.demo.model.dto.UserRegistrationDTO;
+import com.example.demo.model.dto.User.UserLoginDTO;
+import com.example.demo.model.dto.User.UserRegistrationDTO;
 import com.example.demo.model.entity.User;
 import com.example.demo.model.exception.BadRequestException;
 import com.example.demo.repository.UserRepository;

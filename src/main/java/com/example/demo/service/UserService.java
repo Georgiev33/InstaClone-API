@@ -1,8 +1,9 @@
 package com.example.demo.service;
 
-import com.example.demo.model.dto.UserLoginDTO;
-import com.example.demo.model.dto.UserRegistrationDTO;
-import com.example.demo.model.dto.UserWithUsernameAndIdDTO;
+import com.example.demo.model.dto.User.UserLoginDTO;
+import com.example.demo.model.dto.User.UserRegistrationDTO;
+import com.example.demo.model.dto.User.UserUpdateDTO;
+import com.example.demo.model.dto.User.UserWithUsernameAndIdDTO;
 import com.example.demo.model.entity.User;
 import com.example.demo.model.exception.AccessDeniedException;
 import com.example.demo.model.exception.BadRequestException;
@@ -55,8 +56,25 @@ public class UserService implements UserDetailsService {
                 .password(encoder.encode(userRegistrationDTO.password()))
                 .roles(Set.of(roleService.findRole(USER)))
                 .verificationCode(mailService.sendVerificationEmail(userRegistrationDTO))
+                .bio(userRegistrationDTO.bio())
                 .build();
         userRepository.save(user);
+    }
+
+    public void updateUser(UserUpdateDTO userUpdateDTO, String authToken) {
+        long userId = jwtService.extractUserId(authToken);
+        User user = findUserById(userId);
+        User updatedUser = User.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .password(user.getPassword())
+                .verificationCode(user.getVerificationCode())
+                .isVerified(user.isVerified())
+                .isPrivate(user.isPrivate())
+                .bio(userUpdateDTO.bio())
+                .build();
+        userRepository.save(updatedUser);
     }
 
     public void followUser(long followedUserId, String authToken) {
@@ -104,9 +122,27 @@ public class UserService implements UserDetailsService {
                 .password(user.getPassword())
                 .verificationCode(user.getVerificationCode())
                 .isVerified(true)
-                .roles(user.getRoles()).build();
+                .isPrivate(user.isPrivate())
+                .bio(user.getBio())
+                .build();
         userRepository.save(verifiedUser);
         return ResponseEntity.ok(REGISTRATION_SUCCESSFULLY_VERIFIED);
+    }
+
+    public void setPrivateUser(String authToken) {
+        long userId = jwtService.extractUserId(authToken);
+        User user = findUserById(userId);
+        User updatedUser = User.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .password(user.getPassword())
+                .verificationCode(user.getVerificationCode())
+                .isVerified(user.isVerified())
+                .isPrivate(true)
+                .bio(user.getBio())
+                .build();
+        userRepository.save(updatedUser);
     }
 
     public User findUserByUsername(String username) {
@@ -163,5 +199,4 @@ public class UserService implements UserDetailsService {
             throw new BadRequestException(EMAIL_ALREADY_EXISTS);
         }
     }
-
 }

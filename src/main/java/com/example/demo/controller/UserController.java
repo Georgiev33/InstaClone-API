@@ -1,18 +1,18 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.dto.PostResponseDTO;
-import com.example.demo.model.dto.UserLoginDTO;
-import com.example.demo.model.dto.UserRegistrationDTO;
-import com.example.demo.model.dto.UserWithUsernameAndIdDTO;
+import com.example.demo.model.dto.User.UserLoginDTO;
+import com.example.demo.model.dto.User.UserRegistrationDTO;
+import com.example.demo.model.dto.User.UserUpdateDTO;
+import com.example.demo.model.dto.User.UserWithUsernameAndIdDTO;
 import com.example.demo.service.PostService;
 import com.example.demo.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
-
-
 
 @RestController
 @RequestMapping("/user")
@@ -24,6 +24,16 @@ public class UserController {
     @GetMapping("/auth/{verificationCode}")
     public ResponseEntity<String> verifyUser(@PathVariable String verificationCode) {
         return userService.verifyUser(verificationCode);
+    }
+
+    @PutMapping()
+    public void updateUser(@RequestBody UserUpdateDTO userUpdateDTO, @RequestHeader("Authorization") String authToken) {
+        userService.updateUser(userUpdateDTO, authToken);
+    }
+
+    @PutMapping("/private")
+    public void setPrivateUser(@RequestHeader("Authorization") String authToken) {
+        userService.setPrivateUser(authToken);
     }
 
     @PostMapping("/register")
@@ -51,8 +61,9 @@ public class UserController {
     public List<UserWithUsernameAndIdDTO> getFollowing(@RequestHeader("Authorization") String authToken) {
         return userService.getFollowing(authToken);
     }
+
     @GetMapping("{userId}/posts")
-    public Page<PostResponseDTO> getAllUserPosts(@PathVariable long userId, @RequestParam int page, @RequestParam int size){
+    public Page<PostResponseDTO> getAllUserPosts(@PathVariable long userId, @RequestParam int page, @RequestParam int size) {
         return postService.getAllUserPosts(userId, page, size);
     }
 }
