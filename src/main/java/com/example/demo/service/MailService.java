@@ -17,8 +17,8 @@ public class MailService {
 
     public String sendVerificationEmail(UserRegistrationDTO userRegistrationDTO) {
         String verificationCode = RandomString.make(INT_64);
-        simpleMailMessage.setTo(userRegistrationDTO.getEmail());
-        simpleMailMessage.setText(APPLICATION_URL_USER + verificationCode);
+        simpleMailMessage.setTo(userRegistrationDTO.email());
+        simpleMailMessage.setText(APPLICATION_URL_USER + "auth/" + verificationCode);
         simpleMailMessage.setSubject(DO_NOT_REPLY);
         new Thread(() -> mailSender.send(simpleMailMessage)).start();
         return verificationCode;

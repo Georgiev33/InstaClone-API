@@ -28,7 +28,7 @@ public class SecurityConfig {
                 .authenticationEntryPoint(customAuthenticationEntryPoint)
                 .and()
                 .authorizeHttpRequests()
-                .requestMatchers("/user/register", "/user/auth")
+                .requestMatchers("/user/register", "/user/auth", "/user/auth/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated()

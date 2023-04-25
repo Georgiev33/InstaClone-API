@@ -44,5 +44,7 @@ public class Constants {
     public static final String TAGGED_YOU_IN_HIS_POST = " tagged you in his post";
     public static final String TAGGED_YOU_IN_HIS_STORY = " tagged you in his story";
     public static final String TAGGED_YOU_IN_HIS_COMMENT = " tagged you in his comment";
+    public static final String ADMIN = "admin";
+    public static final String USER = "user";
 
 }

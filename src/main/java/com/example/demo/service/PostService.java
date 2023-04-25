@@ -50,7 +50,7 @@ public class PostService {
         Post saved = postRepository.save(post);
         fileService.createContent(dto.content(), userId, saved);
 
-        return mapPostToPostResponseDto(saved);
+        return mapPostToPostResponseDTO(saved);
     }
 
 
@@ -81,15 +81,6 @@ public class PostService {
         return postRepository.findById(postId).orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
     }
 
-    private PostResponseDTO mapPostToPostResponseDto(Post saved) {
-        return new PostResponseDTO(saved.getId(),
-                saved.getContentUrls().stream().map(PostContent::getContentUrl).toList(),
-                saved.getCaption(),
-                saved.getDateCreated(),
-                saved.getHashtags().stream().map(Hashtag::getTagName).toList(),
-                saved.getUserTags().stream().map(User::getUsername).toList());
-    }
-
     @Transactional
     public void react(String authToken, long postId, boolean status) {
         long userId = jwtService.extractUserId(authToken);
@@ -108,6 +99,14 @@ public class PostService {
         userPostReactionRepository.save(userPostReaction);
     }
 
+    public Page<PostResponseDTO> getAllUserPosts(long userId, int page, int size) {
+        Page<Post> posts = postRepository.findAllByUserId(userId, PageRequest.of(page, size));
+        List<PostResponseDTO> pageList = posts.stream()
+                .map(this::mapPostToPostResponseDTO)
+                .toList();
+        return new PageImpl<>(pageList);
+    }
+
     private boolean deleteReactionIfStatusMatches(long userId, long postId, boolean status) {
         Optional<UserPostReaction> reaction =
                 userPostReactionRepository.findById(new UserPostReaction.UserPostReactionKey(userId, postId));
@@ -118,17 +117,13 @@ public class PostService {
         return false;
     }
 
-    public Page<PostResponseDTO> getAllUserPosts(long userId, int page, int size) {
-        Page<Post> posts = postRepository.findAllByUserId(userId,PageRequest.of(page, size));
-        List<PostResponseDTO> pageList = posts.stream()
-                .map(post -> new PostResponseDTO(post.getId(),
-                        post.getContentUrls().stream().map(PostContent::getContentUrl).toList(),
-                        post.getCaption(),
-                        post.getDateCreated(),
-                        post.getHashtags().stream().map(Hashtag::getTagName).toList(),
-                        post.getUserTags().stream().map(User::getUsername).toList()))
-                .toList();
-        System.out.println(posts.getContent().get(0).getContentUrls().get(0));
-        return new PageImpl<>(pageList);
+    private PostResponseDTO mapPostToPostResponseDTO(Post saved) {
+        return new PostResponseDTO(saved.getId(),
+                saved.getContentUrls().stream().map(PostContent::getContentUrl).toList(),
+                saved.getCaption(),
+                saved.getDateCreated(),
+                saved.getHashtags().stream().map(Hashtag::getTagName).toList(),
+                saved.getUserTags().stream().map(User::getUsername).toList());
     }
+
 }

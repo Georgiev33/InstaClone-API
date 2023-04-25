@@ -1,9 +1,7 @@
 package com.example.demo.model.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Set;
@@ -12,6 +10,8 @@ import java.util.Set;
 @Setter
 @Entity(name = "authorities")
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Role implements GrantedAuthority {
     @Id
     private Long id;

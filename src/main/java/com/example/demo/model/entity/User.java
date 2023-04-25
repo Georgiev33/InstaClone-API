@@ -1,8 +1,7 @@
 package com.example.demo.model.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -10,7 +9,10 @@ import java.util.*;
 
 @Entity(name = "users")
 @Getter
-@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+//@EqualsAndHashCode
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,6 +22,7 @@ public class User implements UserDetails {
     private String password;
     private String verificationCode;
     private boolean isVerified;
+    private boolean isPrivate;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Post> posts;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -75,6 +78,6 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return isVerified;
     }
 }

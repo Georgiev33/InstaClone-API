@@ -35,6 +35,7 @@ public class CommentService {
         validateCommentData(createCommentDTO);
         User author = userService.findUserById(userId);
         Post ownerPost = postService.findPostById(createCommentDTO.getPostId());
+        userService.hasPermission(author,ownerPost.getUser());
 
         Comment comment = new Comment();
         comment.setPost(ownerPost);

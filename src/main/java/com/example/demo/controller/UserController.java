@@ -21,13 +21,14 @@ public class UserController {
     private final UserService userService;
     private final PostService postService;
 
-    @GetMapping("{verificationCode}")
+    @GetMapping("/auth/{verificationCode}")
     public ResponseEntity<String> verifyUser(@PathVariable String verificationCode) {
         return userService.verifyUser(verificationCode);
     }
 
     @PostMapping("/register")
     public void createUser(@RequestBody UserRegistrationDTO userRegistrationDTO) {
+        System.out.println("test");
         userService.createUser(userRegistrationDTO);
     }
 

@@ -3,11 +3,12 @@ package com.example.demo.service;
 import com.example.demo.model.dto.UserLoginDTO;
 import com.example.demo.model.dto.UserRegistrationDTO;
 import com.example.demo.model.dto.UserWithUsernameAndIdDTO;
+import com.example.demo.model.entity.Role;
 import com.example.demo.model.entity.User;
+import com.example.demo.model.exception.AccessDeniedException;
 import com.example.demo.model.exception.BadRequestException;
 import com.example.demo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,7 +28,6 @@ import static com.example.demo.util.Constants.*;
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
-    private final ModelMapper modelMapper;
     private final BCryptPasswordEncoder encoder;
     private final AuthenticationManager authenticationManager;
     private final MailService mailService;
@@ -47,10 +47,13 @@ public class UserService implements UserDetailsService {
 
     public void createUser(UserRegistrationDTO userRegistrationDTO) {
         validateUser(userRegistrationDTO);
-        User user = modelMapper.map(userRegistrationDTO, User.class);
-        user.setPassword(encoder.encode(userRegistrationDTO.getPassword()));
-        user.setRoles(Set.of(roleService.findRole("user")));
-        user.setVerificationCode(mailService.sendVerificationEmail(userRegistrationDTO));
+        User user = User.builder()
+                .username(userRegistrationDTO.username())
+                .email(userRegistrationDTO.email())
+                .password(encoder.encode(userRegistrationDTO.password()))
+                .roles(Set.of(roleService.findRole(USER)))
+                .verificationCode(mailService.sendVerificationEmail(userRegistrationDTO))
+                .build();
         userRepository.save(user);
     }
 
@@ -92,8 +95,15 @@ public class UserService implements UserDetailsService {
     public ResponseEntity<String> verifyUser(String verificationCode) {
         User user = userRepository.findUserByVerificationCodeAndVerificationCodeIsFalse(verificationCode)
                 .orElseThrow(() -> new BadRequestException(INVALID_VERIFICATION_CODE));
-        user.setVerified(true);
-        userRepository.save(user);
+        User verifiedUser = User.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .password(user.getPassword())
+                .verificationCode(user.getVerificationCode())
+                .isVerified(true)
+                .roles(user.getRoles()).build();
+        userRepository.save(verifiedUser);
         return ResponseEntity.ok(REGISTRATION_SUCCESSFULLY_VERIFIED);
     }
 
@@ -109,6 +119,20 @@ public class UserService implements UserDetailsService {
         findUserById(userId);
     }
 
+    public void hasPermission(User authorizedUser, User targetUser) {
+//        if((!authorizedUser.getAuthorities().contains(Role.builder()
+//                .authority(ADMIN)
+//                .build())) || authorizedUser.getFollowers().contains(targetUser)) {
+//            throw new AccessDeniedException(ACCESS_DENIED);
+//        }
+        System.out.println(authorizedUser.getRoles().contains(roleService.findRole(ADMIN)));
+        System.out.println(authorizedUser.getFollowing());
+        System.out.println(authorizedUser.getFollowers());
+        System.out.println(targetUser.getFollowers());
+        System.out.println(targetUser.getFollowing());
+        System.out.println(authorizedUser.getFollowers().contains(targetUser));
+    }
+
     private boolean doesEmailExist(String email) {
         Optional<User> u = userRepository.findUserByEmail(email);
         return u.isPresent();
@@ -120,14 +144,14 @@ public class UserService implements UserDetailsService {
     }
 
     private void validateUser(UserRegistrationDTO userRegistrationDTO) {
-        if (!userRegistrationDTO.getPassword().equals(userRegistrationDTO.getConfirmPassword())) {
+        if (!userRegistrationDTO.password().equals(userRegistrationDTO.confirmPassword())) {
             throw new BadRequestException(PASSWORDS_MUST_MATCH);
         }
-        if (doesUsernameExist(userRegistrationDTO.getUsername())) {
+        if (doesUsernameExist(userRegistrationDTO.username())) {
             throw new BadRequestException(USERNAME_ALREADY_EXISTS);
         }
 
-        if (doesEmailExist(userRegistrationDTO.getEmail())) {
+        if (doesEmailExist(userRegistrationDTO.email())) {
             throw new BadRequestException(EMAIL_ALREADY_EXISTS);
         }
     }
