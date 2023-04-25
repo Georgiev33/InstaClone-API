@@ -41,10 +41,10 @@ public class PostController {
         Files.copy(file.toPath(), response.getOutputStream());
     }
 
-    @PostMapping("/react/{postId}")
-    public void likePost(@PathVariable long postId,
+    @PostMapping("/{postId}/reactions")
+    public void react(@PathVariable long postId,
                          @RequestHeader("Authorization") String authToken,
                          @RequestParam boolean status) {
-        postService.likePost(authToken, postId, status);
+        postService.react(authToken, postId, status);
     }
 }

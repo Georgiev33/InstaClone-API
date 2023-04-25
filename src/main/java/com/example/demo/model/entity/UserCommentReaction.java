@@ -6,19 +6,19 @@ import lombok.*;
 import java.io.Serial;
 import java.io.Serializable;
 
+@Entity(name = "users_comments_reactions")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Entity(name = "users_posts_reactions")
-public class UserPostReaction {
+public class UserCommentReaction {
     @EmbeddedId
-    private UserPostReactionKey id;
+    private UserCommentReactionKey id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("postId")
-    @JoinColumn(name = "post_id")
-    private Post post;
+    @MapsId("commentId")
+    @JoinColumn(name = "comment_id")
+    private Comment comment;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("userId")
@@ -26,16 +26,17 @@ public class UserPostReaction {
     private User user;
     private boolean status;
 
+
     @Embeddable
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class UserPostReactionKey implements Serializable {
+    public static class UserCommentReactionKey implements Serializable {
         @Serial
-        private static final long serialVersionUID = -5127123850693554092L;
+        private static final long serialVersionUID = -51241250693584292L;
         @Column(name = "user_id")
         private Long userId;
-        @Column(name = "post_id")
-        private Long postId;
+        @Column(name = "comment_id")
+        private Long commentId;
     }
 }

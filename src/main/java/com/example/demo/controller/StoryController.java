@@ -31,10 +31,11 @@ public class StoryController {
         Files.copy(file.toPath(), response.getOutputStream());
     }
 
-    @PostMapping("/react/{storyId}")
+    @PostMapping("/{storyId}/reactions")
     public void likeStory(@PathVariable long storyId,
                           @RequestHeader("Authorization") String authToken,
                           @RequestParam boolean status) {
         storyService.likeStory(authToken, storyId, status);
     }
+
 }

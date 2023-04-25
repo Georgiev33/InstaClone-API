@@ -2,20 +2,19 @@ package com.example.demo.service;
 
 import com.example.demo.model.dto.CommentResponseDTO;
 import com.example.demo.model.dto.CreateCommentDTO;
-import com.example.demo.model.entity.Comment;
-import com.example.demo.model.entity.Notification;
-import com.example.demo.model.entity.Post;
-import com.example.demo.model.entity.User;
+import com.example.demo.model.entity.*;
 import com.example.demo.model.exception.BadRequestException;
 import com.example.demo.model.exception.NotFoundException;
 import com.example.demo.repository.CommentRepository;
 import com.example.demo.repository.NotificationRepository;
+import com.example.demo.repository.UserCommentReactionRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static com.example.demo.util.Constants.TAGGED_YOU_IN_HIS_COMMENT;
 
@@ -28,6 +27,7 @@ public class CommentService {
     private final ModelMapper modelMapper;
     private final JwtService jwtService;
     private final NotificationRepository notificationRepository;
+    private final UserCommentReactionRepository userCommentReactionRepository;
 
     @Transactional
     public CommentResponseDTO createComment(CreateCommentDTO createCommentDTO, String authToken) {
@@ -84,5 +84,31 @@ public class CommentService {
             throw new BadRequestException("Can't comment a nonexistent post");
         }
 
+    }
+
+    public void react(String authToken, long commentId, boolean status) {
+        long userId = jwtService.extractUserId(authToken);
+        User user = userService.findUserById(userId);
+        Comment comment = findById(commentId,"Comment doesn't exist.");
+
+        if (deleteReactionIfStatusMatches(userId, commentId, status)) {
+            return;
+        }
+        UserCommentReaction userCommentReaction = UserCommentReaction.builder()
+                .id(new UserCommentReaction.UserCommentReactionKey(userId, commentId))
+                .user(user)
+                .comment(comment)
+                .status(status)
+                .build();
+        userCommentReactionRepository.save(userCommentReaction);
+    }
+    private boolean deleteReactionIfStatusMatches(long userId, long commentId, boolean status) {
+        Optional<UserCommentReaction> reaction =
+                userCommentReactionRepository.findById(new UserCommentReaction.UserCommentReactionKey(userId, commentId));
+        if (reaction.isPresent() && reaction.get().isStatus() == status) {
+            userCommentReactionRepository.delete(reaction.get());
+            return true;
+        }
+        return false;
     }
 }

@@ -3,7 +3,6 @@ package com.example.demo.service;
 import com.example.demo.model.dto.CreateStoryDTO;
 import com.example.demo.model.dto.StoryResponseDTO;
 import com.example.demo.model.entity.*;
-import com.example.demo.model.exception.BadRequestException;
 import com.example.demo.model.exception.NotFoundException;
 import com.example.demo.repository.*;
 import jakarta.transaction.Transactional;
@@ -66,7 +65,7 @@ public class StoryService {
             return;
         }
         UserStoryReaction userStoryReaction = UserStoryReaction.builder()
-                .id(new UserStoryReactionKey(userId, storyId))
+                .id(new UserStoryReaction.UserStoryReactionKey(userId, storyId))
                 .user(user)
                 .story(story)
                 .status(status)
@@ -85,7 +84,7 @@ public class StoryService {
 
     private boolean deleteReactionIfStatusMatches(long userId, long storyId, boolean status) {
         Optional<UserStoryReaction> reaction =
-                userStoryReactionRepository.findById(new UserStoryReactionKey(userId, storyId));
+                userStoryReactionRepository.findById(new UserStoryReaction.UserStoryReactionKey(userId, storyId));
         if (reaction.isPresent() && reaction.get().isStatus() == status) {
             userStoryReactionRepository.delete(reaction.get());
             return true;

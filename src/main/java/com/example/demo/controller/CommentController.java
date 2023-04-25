@@ -18,5 +18,10 @@ public class CommentController {
                                             @RequestHeader("Authorization") String authToken){
         return commentService.createComment(commentDTO, authToken);
     }
-
+    @PostMapping("/{commentId}/reactions")
+    public void react(@PathVariable long commentId,
+                      @RequestHeader("Authorization") String authToken,
+                      @RequestParam boolean status) {
+        commentService.react(authToken, commentId, status);
+    }
 }
