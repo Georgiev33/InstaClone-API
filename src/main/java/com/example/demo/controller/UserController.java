@@ -1,16 +1,17 @@
 package com.example.demo.controller;
 
+import com.example.demo.model.dto.PostResponseDTO;
 import com.example.demo.model.dto.UserLoginDTO;
 import com.example.demo.model.dto.UserRegistrationDTO;
 import com.example.demo.model.dto.UserWithUsernameAndIdDTO;
+import com.example.demo.service.PostService;
 import com.example.demo.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
-import static com.example.demo.util.Constants.SUCCESSFUL_LOGOUT;
 
 
 @RestController
@@ -18,6 +19,7 @@ import static com.example.demo.util.Constants.SUCCESSFUL_LOGOUT;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final PostService postService;
 
     @GetMapping("{verificationCode}")
     public ResponseEntity<String> verifyUser(@PathVariable String verificationCode) {
@@ -47,5 +49,9 @@ public class UserController {
     @GetMapping("/following")
     public List<UserWithUsernameAndIdDTO> getFollowing(@RequestHeader("Authorization") String authToken) {
         return userService.getFollowing(authToken);
+    }
+    @GetMapping("{userId}/posts")
+    public Page<PostResponseDTO> getAllUserPosts(@PathVariable long userId, @RequestParam int page, @RequestParam int size){
+        return postService.getAllUserPosts(userId, page, size);
     }
 }

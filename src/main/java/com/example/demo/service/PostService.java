@@ -10,6 +10,9 @@ import com.example.demo.repository.PostRepository;
 import com.example.demo.repository.UserPostReactionRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -113,5 +116,19 @@ public class PostService {
             return true;
         }
         return false;
+    }
+
+    public Page<PostResponseDTO> getAllUserPosts(long userId, int page, int size) {
+        Page<Post> posts = postRepository.findAllByUserId(userId,PageRequest.of(page, size));
+        List<PostResponseDTO> pageList = posts.stream()
+                .map(post -> new PostResponseDTO(post.getId(),
+                        post.getContentUrls().stream().map(PostContent::getContentUrl).toList(),
+                        post.getCaption(),
+                        post.getDateCreated(),
+                        post.getHashtags().stream().map(Hashtag::getTagName).toList(),
+                        post.getUserTags().stream().map(User::getUsername).toList()))
+                .toList();
+        System.out.println(posts.getContent().get(0).getContentUrls().get(0));
+        return new PageImpl<>(pageList);
     }
 }
