@@ -20,4 +20,9 @@ public class ExceptionController extends ResponseEntityExceptionHandler {
     private ProblemDetail handleNotFound(Exception ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
     }
+    @ExceptionHandler(value = {AccessDeniedException.class})
+    @ResponseStatus(code = HttpStatus.UNAUTHORIZED)
+    private ProblemDetail handleAccessDenied(Exception ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
+    }
 }

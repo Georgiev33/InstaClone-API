@@ -3,7 +3,6 @@ package com.example.demo.service;
 import com.example.demo.model.dto.UserLoginDTO;
 import com.example.demo.model.dto.UserRegistrationDTO;
 import com.example.demo.model.dto.UserWithUsernameAndIdDTO;
-import com.example.demo.model.entity.Role;
 import com.example.demo.model.entity.User;
 import com.example.demo.model.exception.AccessDeniedException;
 import com.example.demo.model.exception.BadRequestException;
@@ -12,6 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -119,18 +121,24 @@ public class UserService implements UserDetailsService {
         findUserById(userId);
     }
 
-    public void hasPermission(User authorizedUser, User targetUser) {
-//        if((!authorizedUser.getAuthorities().contains(Role.builder()
-//                .authority(ADMIN)
-//                .build())) || authorizedUser.getFollowers().contains(targetUser)) {
-//            throw new AccessDeniedException(ACCESS_DENIED);
-//        }
-        System.out.println(authorizedUser.getRoles().contains(roleService.findRole(ADMIN)));
-        System.out.println(authorizedUser.getFollowing());
-        System.out.println(authorizedUser.getFollowers());
-        System.out.println(targetUser.getFollowers());
-        System.out.println(targetUser.getFollowing());
-        System.out.println(authorizedUser.getFollowers().contains(targetUser));
+    public void hasPermission(User targetUser) {
+        if (targetUser.isPrivate() && !isLoggedUserAdmin() && !isLoggedUserFollow(targetUser)) {
+            throw new AccessDeniedException(ACCESS_DENIED);
+        }
+    }
+
+    private boolean isLoggedUserAdmin() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(a -> a.contains(ADMIN));
+    }
+
+    private boolean isLoggedUserFollow(User user) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return user.getFollowers().stream()
+                .map(User::getUsername)
+                .anyMatch(u -> u.contains(authentication.getName()));
     }
 
     private boolean doesEmailExist(String email) {

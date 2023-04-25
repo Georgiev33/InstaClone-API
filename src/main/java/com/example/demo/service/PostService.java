@@ -53,17 +53,6 @@ public class PostService {
         return mapPostToPostResponseDTO(saved);
     }
 
-
-    private Set<User> addTaggedUsers(Optional<List<String>> users, User creator) {
-        if (users.isEmpty()) return Collections.emptySet();
-        Set<User> userList = users.get()
-                .stream()
-                .map(userService::findUserByUsername)
-                .collect(Collectors.toSet());
-        notificationService.addNotification(userList, creator.getUsername() + TAGGED_YOU_IN_HIS_POST);
-        return userList;
-    }
-
     public List<String> getAllPostUrls(long postId) {
         List<PostContent> postContents = contentRepository.findAllByPostId(postId)
                 .orElseThrow(() -> new BadRequestException(INVALID_POST_ID));
@@ -124,6 +113,16 @@ public class PostService {
                 saved.getDateCreated(),
                 saved.getHashtags().stream().map(Hashtag::getTagName).toList(),
                 saved.getUserTags().stream().map(User::getUsername).toList());
+    }
+
+    private Set<User> addTaggedUsers(Optional<List<String>> users, User creator) {
+        if (users.isEmpty()) return Collections.emptySet();
+        Set<User> userList = users.get()
+                .stream()
+                .map(userService::findUserByUsername)
+                .collect(Collectors.toSet());
+        notificationService.addNotification(userList, creator.getUsername() + TAGGED_YOU_IN_HIS_POST);
+        return userList;
     }
 
 }

@@ -35,7 +35,7 @@ public class CommentService {
         validateCommentData(createCommentDTO);
         User author = userService.findUserById(userId);
         Post ownerPost = postService.findPostById(createCommentDTO.getPostId());
-        userService.hasPermission(author,ownerPost.getUser());
+        userService.hasPermission(ownerPost.getUser());
 
         Comment comment = new Comment();
         comment.setPost(ownerPost);
@@ -63,6 +63,7 @@ public class CommentService {
     private void addTaggedUsers(List<String> taggedUsers, Comment comment) {
         for (String taggedUser : taggedUsers) {
             User user = userService.findUserByUsername(taggedUser);
+            userService.hasPermission(user);
             comment.getTaggedUsers().add(user);
             Notification notification = Notification.builder()
                     .user(user)
@@ -75,16 +76,6 @@ public class CommentService {
 
     private Comment findById(Long commentId, String exceptionMessage) {
         return commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException(exceptionMessage));
-    }
-
-    private void validateCommentData(CreateCommentDTO createCommentDTO) {
-        if(createCommentDTO.getContent() == null){
-            throw new BadRequestException("Can't create a comment with no content!");
-        }
-        if(createCommentDTO.getPostId() == null){
-            throw new BadRequestException("Can't comment a nonexistent post");
-        }
-
     }
 
     public void react(String authToken, long commentId, boolean status) {
@@ -102,6 +93,15 @@ public class CommentService {
                 .status(status)
                 .build();
         userCommentReactionRepository.save(userCommentReaction);
+    }
+
+    private void validateCommentData(CreateCommentDTO createCommentDTO) {
+        if(createCommentDTO.getContent() == null){
+            throw new BadRequestException("Can't create a comment with no content!");
+        }
+        if(createCommentDTO.getPostId() == null){
+            throw new BadRequestException("Can't comment a nonexistent post");
+        }
     }
     private boolean deleteReactionIfStatusMatches(long userId, long commentId, boolean status) {
         Optional<UserCommentReaction> reaction =
