@@ -20,10 +20,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static com.example.demo.util.Constants.*;
 
@@ -36,7 +33,6 @@ public class UserService implements UserDetailsService {
     private final MailService mailService;
     private final JwtService jwtService;
     private final RoleService roleService;
-
     public String login(UserLoginDTO userLoginDTO) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -199,4 +195,6 @@ public class UserService implements UserDetailsService {
             throw new BadRequestException(EMAIL_ALREADY_EXISTS);
         }
     }
+
+
 }

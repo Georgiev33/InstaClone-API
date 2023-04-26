@@ -66,4 +66,9 @@ public class UserController {
     public Page<PostResponseDTO> getAllUserPosts(@PathVariable long userId, @RequestParam int page, @RequestParam int size) {
         return postService.getAllUserPosts(userId, page, size);
     }
+
+    @GetMapping("/feed")
+    public Page<PostResponseDTO> getFeed(@RequestHeader("Authorization") String authToken, @RequestParam int limit, @RequestParam int offset){
+        return postService.getFeed(authToken, limit, offset);
+    }
 }

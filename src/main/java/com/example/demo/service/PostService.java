@@ -52,7 +52,14 @@ public class PostService {
 
         return mapPostToPostResponseDTO(saved);
     }
-
+    public Page<PostResponseDTO> getFeed(String authToken, int limit, int offset) {
+        long userId = jwtService.extractUserId(authToken);
+        System.out.println(userId);
+        List<Post> posts = postRepository.findPostsByUserIdWithPostTotalCount(userId, limit,offset);
+        return new PageImpl<>(posts.stream()
+                .map(this::mapPostToPostResponseDTO)
+                .toList());
+    }
     public List<String> getAllPostUrls(long postId) {
         List<PostContent> postContents = contentRepository.findAllByPostId(postId)
                 .orElseThrow(() -> new BadRequestException(INVALID_POST_ID));
