@@ -8,7 +8,6 @@ import com.example.demo.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.time.LocalDateTime;
@@ -20,7 +19,6 @@ import static com.example.demo.util.Constants.*;
 @Service
 @RequiredArgsConstructor
 public class StoryService {
-    private final String serverPort;
     private final FileService fileService;
     private final UserService userService;
     private final StoryRepository storyRepository;
@@ -32,7 +30,7 @@ public class StoryService {
     @Transactional
     public StoryResponseDTO createStory(CreateStoryDTO dto, String authToken) {
         long userId = jwtService.extractUserId(authToken);
-        User user = userService.findUserById(userId);
+        User user = userService.findUserByIdOrThrownException(userId);
         Story story = Story.builder()
                 .dateCreated(LocalDateTime.now())
                 .expirationDate(LocalDateTime.now().plusHours(24))
@@ -58,7 +56,7 @@ public class StoryService {
     @Transactional
     public void likeStory(String authToken, long storyId, boolean status) {
         long userId = jwtService.extractUserId(authToken);
-        User user = userService.findUserById(userId);
+        User user = userService.findUserByIdOrThrownException(userId);
         Story story = findStoryById(storyId);
 
         if (deleteReactionIfStatusMatches(userId, storyId, status)) {
@@ -96,7 +94,7 @@ public class StoryService {
         if (users.isEmpty()) return Collections.emptySet();
         Set<User> userList = users.get()
                 .stream()
-                .map(userService::findUserByUsername)
+                .map(userService::findUserByUsernamedOrThrownException)
                 .collect(Collectors.toSet());
         notificationService.addNotification(userList, creator.getUsername() + TAGGED_YOU_IN_HIS_STORY);
         return userList;

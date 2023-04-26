@@ -11,6 +11,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import static com.example.demo.util.Constants.ADMIN;
+
 @EnableWebSecurity
 @Configuration
 @RequiredArgsConstructor
@@ -28,6 +31,9 @@ public class SecurityConfig {
                 .authenticationEntryPoint(customAuthenticationEntryPoint)
                 .and()
                 .authorizeHttpRequests()
+                //TODO i`m having Roles and i think they work fine, but reality is so hard... .hasRole()
+//                .requestMatchers("/admin/report")
+//                .hasRole(ADMIN)
                 .requestMatchers("/user/register", "/user/auth", "/user/auth/**")
                 .permitAll()
                 .anyRequest()
@@ -43,7 +49,6 @@ public class SecurityConfig {
                 .addLogoutHandler(logoutHandler)
                 .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext())
         ;
-
         return http.build();
     }
 }

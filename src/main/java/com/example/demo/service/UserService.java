@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -25,7 +24,7 @@ import java.util.*;
 import static com.example.demo.util.Constants.*;
 
 @Service
-@RequiredArgsConstructor
+@RequiredArgsConstructor()
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder encoder;
@@ -33,6 +32,7 @@ public class UserService implements UserDetailsService {
     private final MailService mailService;
     private final JwtService jwtService;
     private final RoleService roleService;
+
     public String login(UserLoginDTO userLoginDTO) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -40,17 +40,17 @@ public class UserService implements UserDetailsService {
                         userLoginDTO.getPassword()
                 )
         );
-        User user = findUserByUsername(userLoginDTO.getUsername());
+        User user = findUserByUsernamedOrThrownException(userLoginDTO.getUsername());
         return jwtService.generateToken(Map.of("USER_ID", user.getId()), user);
     }
 
     public void createUser(UserRegistrationDTO userRegistrationDTO) {
-        validateUser(userRegistrationDTO);
+        validateUserRegistration(userRegistrationDTO);
         User user = User.builder()
                 .username(userRegistrationDTO.username())
                 .email(userRegistrationDTO.email())
                 .password(encoder.encode(userRegistrationDTO.password()))
-                .roles(Set.of(roleService.findRole(USER)))
+                .roles(List.of(roleService.findRole(USER)))
                 .verificationCode(mailService.sendVerificationEmail(userRegistrationDTO))
                 .bio(userRegistrationDTO.bio())
                 .build();
@@ -59,7 +59,7 @@ public class UserService implements UserDetailsService {
 
     public void updateUser(UserUpdateDTO userUpdateDTO, String authToken) {
         long userId = jwtService.extractUserId(authToken);
-        User user = findUserById(userId);
+        User user = findUserByIdOrThrownException(userId);
         User updatedUser = User.builder()
                 .id(user.getId())
                 .username(user.getUsername())
@@ -78,20 +78,20 @@ public class UserService implements UserDetailsService {
         if (followerId == followedUserId) {
             throw new BadRequestException(USER_CAN_T_FOLLOW_ITSELF);
         }
-        User followed = findUserById(followedUserId);
-        User follower = findUserById(followerId);
+        User followed = findUserByIdOrThrownException(followedUserId);
+        User follower = findUserByIdOrThrownException(followerId);
         followed.getFollowers().add(follower);
         userRepository.save(followed);
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) {
-        return findUserByUsername(username);
+        return findUserByUsernamedOrThrownException(username);
     }
 
     public List<UserWithUsernameAndIdDTO> getFollowers(String authToken) {
         long userId = jwtService.extractUserId(authToken);
-        return findUserById(userId)
+        return findUserByIdOrThrownException(userId)
                 .getFollowers()
                 .stream()
                 .map(user -> new UserWithUsernameAndIdDTO(user.getUsername(), user.getId()))
@@ -100,7 +100,7 @@ public class UserService implements UserDetailsService {
 
     public List<UserWithUsernameAndIdDTO> getFollowing(String authToken) {
         long userId = jwtService.extractUserId(authToken);
-        return findUserById(userId)
+        return findUserByIdOrThrownException(userId)
                 .getFollowing()
                 .stream()
                 .map(user -> new UserWithUsernameAndIdDTO(user.getUsername(), user.getId()))
@@ -127,7 +127,7 @@ public class UserService implements UserDetailsService {
 
     public void setPrivateUser(String authToken) {
         long userId = jwtService.extractUserId(authToken);
-        User user = findUserById(userId);
+        User user = findUserByIdOrThrownException(userId);
         User updatedUser = User.builder()
                 .id(user.getId())
                 .username(user.getUsername())
@@ -141,30 +141,24 @@ public class UserService implements UserDetailsService {
         userRepository.save(updatedUser);
     }
 
-    public User findUserByUsername(String username) {
+    public User findUserByUsernamedOrThrownException(String username) {
         return userRepository.findUserByUsername(username).orElseThrow(() -> new BadRequestException(USER_NOT_FOUND));
     }
 
-    public User findUserById(long userId) {
+    public User findUserByIdOrThrownException(long userId) {
         return userRepository.findById(userId).orElseThrow(() -> new BadRequestException(USER_NOT_FOUND));
     }
 
     public void validateUserById(long userId) {
-        findUserById(userId);
+        findUserByIdOrThrownException(userId);
     }
 
     public void hasPermission(User targetUser) {
-        if (targetUser.isPrivate() && !isLoggedUserAdmin() && !isLoggedUserFollow(targetUser)) {
+        if (targetUser.isPrivate() && !AdminService.isLoggedUserAdmin() && !isLoggedUserFollow(targetUser)) {
             throw new AccessDeniedException(ACCESS_DENIED);
         }
     }
 
-    private boolean isLoggedUserAdmin() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .anyMatch(a -> a.contains(ADMIN));
-    }
 
     private boolean isLoggedUserFollow(User user) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -183,7 +177,7 @@ public class UserService implements UserDetailsService {
         return u.isPresent();
     }
 
-    private void validateUser(UserRegistrationDTO userRegistrationDTO) {
+    private void validateUserRegistration(UserRegistrationDTO userRegistrationDTO) {
         if (!userRegistrationDTO.password().equals(userRegistrationDTO.confirmPassword())) {
             throw new BadRequestException(PASSWORDS_MUST_MATCH);
         }
@@ -195,6 +189,4 @@ public class UserService implements UserDetailsService {
             throw new BadRequestException(EMAIL_ALREADY_EXISTS);
         }
     }
-
-
 }

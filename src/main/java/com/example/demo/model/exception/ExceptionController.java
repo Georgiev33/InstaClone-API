@@ -10,7 +10,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 public class ExceptionController extends ResponseEntityExceptionHandler {
     //TODO set type
-    @ExceptionHandler(value = {BadRequestException.class, InvalidMultipartFileException.class})
+    @ExceptionHandler(value = {BadRequestException.class, InvalidMultipartFileException.class,
+            ReportedUserAlreadyExist.class})
     @ResponseStatus(code = HttpStatus.BAD_REQUEST)
     private ProblemDetail handleBadRequest(Exception ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());

@@ -31,9 +31,9 @@ public class MessageService {
 
 
     public void sendMessage(String message, long receiverId, String token) {
-        User receiver = userService.findUserById(receiverId);
+        User receiver = userService.findUserByIdOrThrownException(receiverId);
         long senderId = jwtService.extractUserId(token);
-        User sender = userService.findUserById(senderId);
+        User sender = userService.findUserByIdOrThrownException(senderId);
         String topicName = generateRoomName(senderId, receiverId);
         NewTopic chatRoomTopic = new NewTopic(topicName, 2, (short) 1);
         kafkaAdmin.createOrModifyTopics(chatRoomTopic);

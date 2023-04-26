@@ -37,7 +37,7 @@ public class PostService {
     @Transactional
     public PostResponseDTO createPost(CreatePostDTO dto, String authToken) {
         long userId = jwtService.extractUserId(authToken);
-        User user = userService.findUserById(userId);
+        User user = userService.findUserByIdOrThrownException(userId);
         Post post = Post.builder()
                 .dateCreated(LocalDateTime.now())
                 .caption(dto.caption())
@@ -80,7 +80,7 @@ public class PostService {
     @Transactional
     public void react(String authToken, long postId, boolean status) {
         long userId = jwtService.extractUserId(authToken);
-        User user = userService.findUserById(userId);
+        User user = userService.findUserByIdOrThrownException(userId);
         Post post = findPostById(postId);
 
         if (deleteReactionIfStatusMatches(userId, postId, status)) {
@@ -126,7 +126,7 @@ public class PostService {
         if (users.isEmpty()) return Collections.emptySet();
         Set<User> userList = users.get()
                 .stream()
-                .map(userService::findUserByUsername)
+                .map(userService::findUserByUsernamedOrThrownException)
                 .collect(Collectors.toSet());
         notificationService.addNotification(userList, creator.getUsername() + TAGGED_YOU_IN_HIS_POST);
         return userList;

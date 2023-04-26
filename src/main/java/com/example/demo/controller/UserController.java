@@ -1,10 +1,12 @@
 package com.example.demo.controller;
 
+import com.example.demo.model.dto.ReportedUsers.ReportUserDTO;
 import com.example.demo.model.dto.PostResponseDTO;
 import com.example.demo.model.dto.User.UserLoginDTO;
 import com.example.demo.model.dto.User.UserRegistrationDTO;
 import com.example.demo.model.dto.User.UserUpdateDTO;
 import com.example.demo.model.dto.User.UserWithUsernameAndIdDTO;
+import com.example.demo.service.AdminService;
 import com.example.demo.service.PostService;
 import com.example.demo.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -20,10 +22,16 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
     private final PostService postService;
+    private final AdminService adminService;
 
     @GetMapping("/auth/{verificationCode}")
     public ResponseEntity<String> verifyUser(@PathVariable String verificationCode) {
         return userService.verifyUser(verificationCode);
+    }
+
+    @PostMapping("/report")
+    public void reportUser(@RequestBody ReportUserDTO reportUserDTO, @RequestHeader("Authorization") String authToken) {
+        adminService.reportUser(reportUserDTO, authToken);
     }
 
     @PutMapping()
@@ -68,7 +76,7 @@ public class UserController {
     }
 
     @GetMapping("/feed")
-    public Page<PostResponseDTO> getFeed(@RequestHeader("Authorization") String authToken, @RequestParam int limit, @RequestParam int offset){
+    public Page<PostResponseDTO> getFeed(@RequestHeader("Authorization") String authToken, @RequestParam int limit, @RequestParam int offset) {
         return postService.getFeed(authToken, limit, offset);
     }
 }

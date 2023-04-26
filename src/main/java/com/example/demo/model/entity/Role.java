@@ -23,5 +23,4 @@ public class Role implements GrantedAuthority {
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     Set<User> users;
-
 }
