@@ -92,6 +92,7 @@ public class PostService {
                 .post(post)
                 .status(status)
                 .build();
+        notificationService.addNotification(post.getUser(), user.getUsername() + " liked your post.");
         userPostReactionRepository.save(userPostReaction);
     }
 

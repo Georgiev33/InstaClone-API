@@ -32,10 +32,10 @@ public class StoryController {
     }
 
     @PostMapping("/{storyId}/reactions")
-    public void likeStory(@PathVariable long storyId,
+    public void react(@PathVariable long storyId,
                           @RequestHeader("Authorization") String authToken,
                           @RequestParam boolean status) {
-        storyService.likeStory(authToken, storyId, status);
+        storyService.react(authToken, storyId, status);
     }
 
 }

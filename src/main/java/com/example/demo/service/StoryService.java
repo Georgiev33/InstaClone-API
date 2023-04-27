@@ -54,7 +54,7 @@ public class StoryService {
     }
 
     @Transactional
-    public void likeStory(String authToken, long storyId, boolean status) {
+    public void react(String authToken, long storyId, boolean status) {
         long userId = jwtService.extractUserId(authToken);
         User user = userService.findUserByIdOrThrownException(userId);
         Story story = findStoryById(storyId);
@@ -68,6 +68,7 @@ public class StoryService {
                 .story(story)
                 .status(status)
                 .build();
+        notificationService.addNotification(story.getUser(), user.getUsername() + " liked your story.");
         userStoryReactionRepository.save(userStoryReaction);
     }
 

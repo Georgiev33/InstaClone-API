@@ -28,6 +28,7 @@ public class CommentService {
     private final JwtService jwtService;
     private final NotificationRepository notificationRepository;
     private final UserCommentReactionRepository userCommentReactionRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public CommentResponseDTO createComment(CreateCommentDTO createCommentDTO, String authToken) {
@@ -57,6 +58,7 @@ public class CommentService {
            commentRepository.save(parentComment);
        }
        commentRepository.save(comment);
+       notificationService.addNotification(ownerPost.getUser(), author.getUsername() + " commented your your post.");
         return modelMapper.map(comment, CommentResponseDTO.class);
     }
 
