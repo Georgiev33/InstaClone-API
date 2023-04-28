@@ -5,17 +5,15 @@ import com.example.demo.model.dto.User.UserRegistrationDTO;
 import com.example.demo.model.dto.User.UserUpdateDTO;
 import com.example.demo.model.dto.User.UserWithUsernameAndIdDTO;
 import com.example.demo.model.entity.User;
-import com.example.demo.model.exception.AccessDeniedException;
-import com.example.demo.model.exception.BadRequestException;
+import com.example.demo.model.exception.*;
 import com.example.demo.repository.UserRepository;
+import com.example.demo.service.contracts.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -24,8 +22,8 @@ import java.util.*;
 import static com.example.demo.util.Constants.*;
 
 @Service
-@RequiredArgsConstructor()
-public class UserService implements UserDetailsService {
+@RequiredArgsConstructor
+public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder encoder;
     private final AuthenticationManager authenticationManager;
@@ -33,18 +31,19 @@ public class UserService implements UserDetailsService {
     private final JwtService jwtService;
     private final RoleService roleService;
 
-    public String login(UserLoginDTO userLoginDTO) {
+    public String login(UserLoginDTO userLoginDTO) throws UserNotFoundException, AuthenticationException {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         userLoginDTO.getUsername(),
                         userLoginDTO.getPassword()
                 )
         );
-        User user = findUserByUsernamedOrThrownException(userLoginDTO.getUsername());
+        User user = findUserByUsername(userLoginDTO.getUsername());
         return jwtService.generateToken(Map.of("USER_ID", user.getId()), user);
     }
 
-    public void createUser(UserRegistrationDTO userRegistrationDTO) {
+    public void createUser(UserRegistrationDTO userRegistrationDTO)
+            throws PasswordMismatchException, UsernameAlreadyExist, EmailAlreadyExist {
         validateUserRegistration(userRegistrationDTO);
         User user = User.builder()
                 .username(userRegistrationDTO.username())
@@ -57,9 +56,9 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
-    public void updateUser(UserUpdateDTO userUpdateDTO, String authToken) {
+    public void updateUser(UserUpdateDTO userUpdateDTO, String authToken) throws UserNotFoundException {
         long userId = jwtService.extractUserId(authToken);
-        User user = findUserByIdOrThrownException(userId);
+        User user = findUserById(userId);
         User updatedUser = User.builder()
                 .id(user.getId())
                 .username(user.getUsername())
@@ -73,34 +72,34 @@ public class UserService implements UserDetailsService {
         userRepository.save(updatedUser);
     }
 
-    public void followUser(long followedUserId, String authToken) {
+    public void followUser(long followedUserId, String authToken) throws BadRequestException {
         long followerId = jwtService.extractUserId(authToken);
         if (followerId == followedUserId) {
             throw new BadRequestException(USER_CAN_T_FOLLOW_ITSELF);
         }
-        User followed = findUserByIdOrThrownException(followedUserId);
-        User follower = findUserByIdOrThrownException(followerId);
+        User followed = findUserById(followedUserId);
+        User follower = findUserById(followerId);
         followed.getFollowers().add(follower);
         userRepository.save(followed);
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) {
-        return findUserByUsernamedOrThrownException(username);
+    public UserDetails loadUserByUsername(String username) throws UserNotFoundException {
+        return findUserByUsername(username);
     }
 
-    public List<UserWithUsernameAndIdDTO> getFollowers(String authToken) {
+    public List<UserWithUsernameAndIdDTO> getFollowers(String authToken) throws UserNotFoundException {
         long userId = jwtService.extractUserId(authToken);
-        return findUserByIdOrThrownException(userId)
+        return findUserById(userId)
                 .getFollowers()
                 .stream()
                 .map(user -> new UserWithUsernameAndIdDTO(user.getUsername(), user.getId()))
                 .toList();
     }
 
-    public List<UserWithUsernameAndIdDTO> getFollowing(String authToken) {
+    public List<UserWithUsernameAndIdDTO> getFollowing(String authToken) throws UserNotFoundException {
         long userId = jwtService.extractUserId(authToken);
-        return findUserByIdOrThrownException(userId)
+        return findUserById(userId)
                 .getFollowing()
                 .stream()
                 .map(user -> new UserWithUsernameAndIdDTO(user.getUsername(), user.getId()))
@@ -108,9 +107,9 @@ public class UserService implements UserDetailsService {
     }
 
 
-    public ResponseEntity<String> verifyUser(String verificationCode) {
+    public ResponseEntity<String> verifyUser(String verificationCode) throws InvalidValidationCode {
         User user = userRepository.findUserByVerificationCodeAndVerificationCodeIsFalse(verificationCode)
-                .orElseThrow(() -> new BadRequestException(INVALID_VERIFICATION_CODE));
+                .orElseThrow(() -> new InvalidValidationCode(INVALID_VERIFICATION_CODE));
         User verifiedUser = User.builder()
                 .id(user.getId())
                 .username(user.getUsername())
@@ -125,9 +124,9 @@ public class UserService implements UserDetailsService {
         return ResponseEntity.ok(REGISTRATION_SUCCESSFULLY_VERIFIED);
     }
 
-    public void setPrivateUser(String authToken) {
+    public void setPrivateUser(String authToken) throws UserNotFoundException {
         long userId = jwtService.extractUserId(authToken);
-        User user = findUserByIdOrThrownException(userId);
+        User user = findUserById(userId);
         User updatedUser = User.builder()
                 .id(user.getId())
                 .username(user.getUsername())
@@ -141,30 +140,16 @@ public class UserService implements UserDetailsService {
         userRepository.save(updatedUser);
     }
 
-    public User findUserByUsernamedOrThrownException(String username) {
-        return userRepository.findUserByUsername(username).orElseThrow(() -> new BadRequestException(USER_NOT_FOUND));
+    public User findUserByUsername(String username) throws UserNotFoundException {
+        return userRepository.findUserByUsername(username).orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND));
     }
 
-    public User findUserByIdOrThrownException(long userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new BadRequestException(USER_NOT_FOUND));
+    public User findUserById(long userId) throws UserNotFoundException {
+        return userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND));
     }
 
-    public void validateUserById(long userId) {
-        findUserByIdOrThrownException(userId);
-    }
-
-    public void hasPermission(User targetUser) {
-        if (targetUser.isPrivate() && !AdminService.isLoggedUserAdmin() && !isLoggedUserFollow(targetUser)) {
-            throw new AccessDeniedException(ACCESS_DENIED);
-        }
-    }
-
-
-    private boolean isLoggedUserFollow(User user) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return user.getFollowers().stream()
-                .map(User::getUsername)
-                .anyMatch(u -> u.contains(authentication.getName()));
+    public void validateUserById(long userId) throws UserNotFoundException {
+        findUserById(userId);
     }
 
     private boolean doesEmailExist(String email) {
@@ -177,16 +162,17 @@ public class UserService implements UserDetailsService {
         return u.isPresent();
     }
 
-    private void validateUserRegistration(UserRegistrationDTO userRegistrationDTO) {
+    private void validateUserRegistration(UserRegistrationDTO userRegistrationDTO)
+            throws PasswordMismatchException, UsernameAlreadyExist, EmailAlreadyExist {
         if (!userRegistrationDTO.password().equals(userRegistrationDTO.confirmPassword())) {
-            throw new BadRequestException(PASSWORDS_MUST_MATCH);
+            throw new PasswordMismatchException(PASSWORDS_MUST_MATCH);
         }
         if (doesUsernameExist(userRegistrationDTO.username())) {
-            throw new BadRequestException(USERNAME_ALREADY_EXISTS);
+            throw new UsernameAlreadyExist(USERNAME_ALREADY_EXISTS);
         }
 
         if (doesEmailExist(userRegistrationDTO.email())) {
-            throw new BadRequestException(EMAIL_ALREADY_EXISTS);
+            throw new EmailAlreadyExist(EMAIL_ALREADY_EXISTS);
         }
     }
 }

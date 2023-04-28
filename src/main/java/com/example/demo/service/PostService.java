@@ -8,6 +8,7 @@ import com.example.demo.model.exception.NotFoundException;
 import com.example.demo.repository.PostContentRepository;
 import com.example.demo.repository.PostRepository;
 import com.example.demo.repository.UserPostReactionRepository;
+import com.example.demo.service.contracts.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -37,7 +38,7 @@ public class PostService {
     @Transactional
     public PostResponseDTO createPost(CreatePostDTO dto, String authToken) {
         long userId = jwtService.extractUserId(authToken);
-        User user = userService.findUserByIdOrThrownException(userId);
+        User user = userService.findUserById(userId);
         Post post = Post.builder()
                 .dateCreated(LocalDateTime.now())
                 .caption(dto.caption())
@@ -80,7 +81,7 @@ public class PostService {
     @Transactional
     public void react(String authToken, long postId, boolean status) {
         long userId = jwtService.extractUserId(authToken);
-        User user = userService.findUserByIdOrThrownException(userId);
+        User user = userService.findUserById(userId);
         Post post = findPostById(postId);
 
         if (deleteReactionIfStatusMatches(userId, postId, status)) {
@@ -127,7 +128,7 @@ public class PostService {
         if (users.isEmpty()) return Collections.emptySet();
         Set<User> userList = users.get()
                 .stream()
-                .map(userService::findUserByUsernamedOrThrownException)
+                .map(userService::findUserByUsername)
                 .collect(Collectors.toSet());
         notificationService.addNotification(userList, creator.getUsername() + TAGGED_YOU_IN_HIS_POST);
         return userList;

@@ -6,6 +6,7 @@ import com.example.demo.model.entity.Notification;
 import com.example.demo.model.entity.User;
 
 import com.example.demo.repository.NotificationRepository;
+import com.example.demo.service.contracts.UserService;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.*;
@@ -31,9 +32,9 @@ public class MessageService {
 
 
     public void sendMessage(String message, long receiverId, String token) {
-        User receiver = userService.findUserByIdOrThrownException(receiverId);
+        User receiver = userService.findUserById(receiverId);
         long senderId = jwtService.extractUserId(token);
-        User sender = userService.findUserByIdOrThrownException(senderId);
+        User sender = userService.findUserById(senderId);
         String topicName = generateRoomName(senderId, receiverId);
         NewTopic chatRoomTopic = new NewTopic(topicName, 2, (short) 1);
         kafkaAdmin.createOrModifyTopics(chatRoomTopic);

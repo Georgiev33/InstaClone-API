@@ -8,6 +8,8 @@ import com.example.demo.model.exception.NotFoundException;
 import com.example.demo.repository.CommentRepository;
 import com.example.demo.repository.NotificationRepository;
 import com.example.demo.repository.UserCommentReactionRepository;
+import com.example.demo.service.contracts.AdminService;
+import com.example.demo.service.contracts.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -24,6 +26,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final PostService postService;
     private final UserService userService;
+    private final AdminService adminService;
     private final ModelMapper modelMapper;
     private final JwtService jwtService;
     private final NotificationRepository notificationRepository;
@@ -34,9 +37,9 @@ public class CommentService {
     public CommentResponseDTO createComment(CreateCommentDTO createCommentDTO, String authToken) {
         long userId = jwtService.extractUserId(authToken);
         validateCommentData(createCommentDTO);
-        User author = userService.findUserByIdOrThrownException(userId);
+        User author = userService.findUserById(userId);
         Post ownerPost = postService.findPostById(createCommentDTO.getPostId());
-        userService.hasPermission(ownerPost.getUser());
+        adminService.hasPermission(ownerPost.getUser());
 
         Comment comment = new Comment();
         comment.setPost(ownerPost);
@@ -64,8 +67,8 @@ public class CommentService {
 
     private void addTaggedUsers(List<String> taggedUsers, Comment comment) {
         for (String taggedUser : taggedUsers) {
-            User user = userService.findUserByUsernamedOrThrownException(taggedUser);
-            userService.hasPermission(user);
+            User user = userService.findUserByUsername(taggedUser);
+            adminService.hasPermission(user);
             comment.getTaggedUsers().add(user);
             Notification notification = Notification.builder()
                     .user(user)
@@ -82,7 +85,7 @@ public class CommentService {
 
     public void react(String authToken, long commentId, boolean status) {
         long userId = jwtService.extractUserId(authToken);
-        User user = userService.findUserByIdOrThrownException(userId);
+        User user = userService.findUserById(userId);
         Comment comment = findById(commentId,"Comment doesn't exist.");
 
         if (deleteReactionIfStatusMatches(userId, commentId, status)) {

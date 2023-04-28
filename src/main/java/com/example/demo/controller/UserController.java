@@ -6,9 +6,9 @@ import com.example.demo.model.dto.User.UserLoginDTO;
 import com.example.demo.model.dto.User.UserRegistrationDTO;
 import com.example.demo.model.dto.User.UserUpdateDTO;
 import com.example.demo.model.dto.User.UserWithUsernameAndIdDTO;
-import com.example.demo.service.AdminService;
+import com.example.demo.service.AdminServiceImpl;
 import com.example.demo.service.PostService;
-import com.example.demo.service.UserService;
+import com.example.demo.service.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -20,9 +20,9 @@ import java.util.List;
 @RequestMapping("/user")
 @RequiredArgsConstructor
 public class UserController {
-    private final UserService userService;
+    private final UserServiceImpl userService;
     private final PostService postService;
-    private final AdminService adminService;
+    private final AdminServiceImpl adminService;
 
     @GetMapping("/auth/{verificationCode}")
     public ResponseEntity<String> verifyUser(@PathVariable String verificationCode) {
