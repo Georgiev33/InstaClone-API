@@ -1,7 +1,7 @@
 //package com.example.demo.service;
 //
-//import com.example.demo.model.dto.CreatePostDTO;
-//import com.example.demo.model.dto.PostResponseDTO;
+//import com.example.demo.model.dto.post.CreatePostDTO;
+//import com.example.demo.model.dto.post.PostResponseDTO;
 //import com.example.demo.model.entity.Post;
 //import com.example.demo.model.entity.User;
 //import com.example.demo.model.exception.BadRequestException;

@@ -1,4 +1,4 @@
-package com.example.demo.model.dto;
+package com.example.demo.model.dto.post;
 
 
 import java.time.LocalDateTime;

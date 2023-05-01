@@ -1,7 +1,7 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.dto.CreatePostDTO;
-import com.example.demo.model.dto.PostResponseDTO;
+import com.example.demo.model.dto.post.CreatePostDTO;
+import com.example.demo.model.dto.post.PostResponseDTO;
 import com.example.demo.service.PostService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

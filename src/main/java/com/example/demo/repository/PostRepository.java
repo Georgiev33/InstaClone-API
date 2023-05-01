@@ -1,5 +1,6 @@
 package com.example.demo.repository;
 
+import com.example.demo.model.entity.Hashtag;
 import com.example.demo.model.entity.Post;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -8,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post,Long> {
@@ -29,4 +31,5 @@ public interface PostRepository extends JpaRepository<Post,Long> {
             "ORDER BY posts.post_total_count DESC",
           nativeQuery = true)
     List<Post> findPostsByUserIdWithPostTotalCount(long userId, int limit, int offset);
+
 }

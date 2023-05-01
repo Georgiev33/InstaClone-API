@@ -1,7 +1,7 @@
 package com.example.demo.service;
 
-import com.example.demo.model.dto.CreatePostDTO;
-import com.example.demo.model.dto.PostResponseDTO;
+import com.example.demo.model.dto.post.CreatePostDTO;
+import com.example.demo.model.dto.post.PostResponseDTO;
 import com.example.demo.model.entity.*;
 import com.example.demo.model.exception.BadRequestException;
 import com.example.demo.model.exception.NotFoundException;
@@ -53,10 +53,12 @@ public class PostService {
 
         return mapPostToPostResponseDTO(saved);
     }
-    public Page<PostResponseDTO> getFeed(String authToken, int limit, int offset) {
+    public Page<PostResponseDTO> getFeed(String authToken, int page, int size) {
         long userId = jwtService.extractUserId(authToken);
         System.out.println(userId);
-        List<Post> posts = postRepository.findPostsByUserIdWithPostTotalCount(userId, limit,offset);
+        int offset = page * size;
+        int limit = size;
+        List<Post> posts = postRepository.findPostsByUserIdWithPostTotalCount(userId, offset,limit);
         return new PageImpl<>(posts.stream()
                 .map(this::mapPostToPostResponseDTO)
                 .toList());

@@ -1,7 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.dto.ReportedUsers.ReportUserDTO;
-import com.example.demo.model.dto.PostResponseDTO;
+import com.example.demo.model.dto.post.PostResponseDTO;
 import com.example.demo.model.dto.User.UserLoginDTO;
 import com.example.demo.model.dto.User.UserRegistrationDTO;
 import com.example.demo.model.dto.User.UserUpdateDTO;
@@ -71,12 +71,16 @@ public class UserController {
     }
 
     @GetMapping("{userId}/posts")
-    public Page<PostResponseDTO> getAllUserPosts(@PathVariable long userId, @RequestParam int page, @RequestParam int size) {
+    public Page<PostResponseDTO> getAllUserPosts(@PathVariable long userId,
+                                                 @RequestParam(required = false, defaultValue = "0") int page,
+                                                 @RequestParam(required = false, defaultValue = "10") int size) {
         return postService.getAllUserPosts(userId, page, size);
     }
 
     @GetMapping("/feed")
-    public Page<PostResponseDTO> getFeed(@RequestHeader("Authorization") String authToken, @RequestParam int limit, @RequestParam int offset) {
-        return postService.getFeed(authToken, limit, offset);
+    public Page<PostResponseDTO> getFeed(@RequestHeader("Authorization") String authToken,
+                                         @RequestParam(required = false, defaultValue = "0") int page,
+                                         @RequestParam(required = false, defaultValue = "10") int size) {
+        return postService.getFeed(authToken, page, size);
     }
 }
