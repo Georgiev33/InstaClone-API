@@ -53,7 +53,8 @@ public class User implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "autority_id")
     )
     private List<Role> roles;
-
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private Set<SearchQuery> queries;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles;
