@@ -67,7 +67,7 @@ public class CommentService {
 
     private void addTaggedUsers(List<String> taggedUsers, Comment comment) {
         for (String taggedUser : taggedUsers) {
-            User user = userValidationService.findUserByUsername(taggedUser);
+            User user = userValidationService.getUserOrThrowException(taggedUser);
             adminService.hasPermission(user);
             comment.getTaggedUsers().add(user);
             Notification notification = Notification.builder()

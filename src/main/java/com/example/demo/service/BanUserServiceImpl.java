@@ -24,7 +24,7 @@ public class BanUserServiceImpl implements BanUserService {
 
     @Override
     public void banUser(BanUserDTO banUserDTO, String authToken) throws UserNotFoundException, UserAlreadyBannedException {
-        userValidationService.validateUserById(banUserDTO.userIdToBan());
+        userValidationService.throwExceptionIfUserNotFound(banUserDTO.userIdToBan());
         final long adminId = jwtService.extractUserId(authToken);
         isBannedUserIsAlreadyBanned(banUserDTO.userIdToBan());
         bannedUsersRepository.save(
@@ -38,7 +38,7 @@ public class BanUserServiceImpl implements BanUserService {
 
     @Override
     public void unbanUser(UnbanUserDTO unbanUserDTO, String authToken) throws UserNotFoundException, BannedUserException {
-        userValidationService.validateUserById(unbanUserDTO.userIdToUnban());
+        userValidationService.throwExceptionIfUserNotFound(unbanUserDTO.userIdToUnban());
         bannedUsersRepository.delete(findBannedUser(unbanUserDTO.userIdToUnban()));
     }
 

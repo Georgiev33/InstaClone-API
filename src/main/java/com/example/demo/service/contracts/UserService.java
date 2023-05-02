@@ -11,7 +11,7 @@ import java.util.List;
 
 
 public interface UserService extends UserDetailsService {
-    String login(UserLoginDTO userLoginDTO) throws UserNotFoundException, BannedUserException;
+    String login(UserLoginDTO userLoginDTO) throws BannedUserException;
 
     void createUser(UserRegistrationDTO userRegistrationDTO)
             throws PasswordMismatchException, UsernameAlreadyExist, EmailAlreadyExist;

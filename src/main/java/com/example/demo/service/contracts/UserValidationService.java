@@ -7,16 +7,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 public interface UserValidationService {
-    User validateUsernameForLogin(String username) throws UsernameNotFoundException;
+    User getUsernameForLoginOrThrowException(String username) throws UsernameNotFoundException;
 
-    User findUserByUsername(String username)throws UserNotFoundException;
+    User getUserOrThrowException(String username)throws UserNotFoundException;
 
     User findUserById(long userId) throws UserNotFoundException;
 
-    void validateUserById(long userId) throws UserNotFoundException;
+    void throwExceptionIfUserNotFound(long userId) throws UserNotFoundException;
     ResponseEntity<String> verifyUser(String verificationCode)throws InvalidValidationCode;
     void validateUserRegistration(UserRegistrationDTO userRegistrationDTO)
             throws PasswordMismatchException, UsernameAlreadyExist, EmailAlreadyExist;
-    void isUserVerified(boolean verified) throws UserNotVerifiedException;
-    void isUserBanned(Long id) throws BannedUserException;
+    void throwExceptionIfUserNotVerified(boolean verified) throws UserNotVerifiedException;
+    void throwExceptionIfUserIsBanned(Long id) throws BannedUserException;
+    boolean isUserBanned(Long id);
 }
+

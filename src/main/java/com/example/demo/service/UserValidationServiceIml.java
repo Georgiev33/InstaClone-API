@@ -23,12 +23,12 @@ public class UserValidationServiceIml implements UserValidationService {
     private final BannedUsersRepository bannedUsersRepository;
 
     @Override
-    public User validateUsernameForLogin(String username) throws UsernameNotFoundException {
+    public User getUsernameForLoginOrThrowException(String username) throws UsernameNotFoundException {
         return userRepository.findUserByUsername(username).orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND));
     }
 
     @Override
-    public User findUserByUsername(String username) throws UserNotFoundException {
+    public User getUserOrThrowException(String username) throws UserNotFoundException {
         return userRepository.findUserByUsername(username).orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND));
     }
 
@@ -38,7 +38,7 @@ public class UserValidationServiceIml implements UserValidationService {
     }
 
     @Override
-    public void validateUserById(long userId) throws UserNotFoundException {
+    public void throwExceptionIfUserNotFound(long userId) throws UserNotFoundException {
         findUserById(userId);
     }
 
@@ -76,17 +76,21 @@ public class UserValidationServiceIml implements UserValidationService {
     }
 
     @Override
-    public void isUserVerified(boolean verified) throws UserNotVerifiedException {
+    public void throwExceptionIfUserNotVerified(boolean verified) throws UserNotVerifiedException {
         if (!verified) {
             throw new UserNotVerifiedException("Check email for verification code");
         }
     }
 
     @Override
-    public void isUserBanned(Long userId) throws BannedUserException {
+    public void throwExceptionIfUserIsBanned(Long userId) throws BannedUserException {
         if (bannedUsersRepository.findByBannedId(userId).isPresent()) {
             throw new BannedUserException("User is banned");
         }
+    }
+
+    public boolean isUserBanned(Long userId) throws BannedUserException {
+        return bannedUsersRepository.findByBannedId(userId).isPresent();
     }
 
     private boolean doesEmailExist(String email) {

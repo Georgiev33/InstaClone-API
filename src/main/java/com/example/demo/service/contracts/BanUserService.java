@@ -9,5 +9,4 @@ import com.example.demo.model.exception.UserNotFoundException;
 public interface BanUserService {
     void banUser(BanUserDTO banUserDTO, String authToken) throws UserNotFoundException, UserAlreadyBannedException;
     void unbanUser(UnbanUserDTO unbanUserDTO, String authToken) throws UserNotFoundException, BannedUserException;
-
 }

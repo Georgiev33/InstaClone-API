@@ -37,7 +37,7 @@ public class AdminServiceImpl implements AdminService {
         if (isReportExist(reporterId, reportUserDTO.reportedId())) {
             throw new ReportedUserAlreadyExist("User with id" + reportUserDTO.reportedId() + " is already reported");
         }
-        userValidationService.validateUserById(reportUserDTO.reportedId());
+        userValidationService.throwExceptionIfUserNotFound(reportUserDTO.reportedId());
         reportedUsersRepository.save(ReportedUsers.builder()
                 .reporterId(reporterId)
                 .reportedId(reportUserDTO.reportedId())

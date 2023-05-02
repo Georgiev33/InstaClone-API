@@ -5,12 +5,10 @@ import com.example.demo.model.dto.User.UserWithUsernameAndIdDTO;
 import com.example.demo.model.dto.post.PostSearchResponseDTO;
 import com.example.demo.model.dto.search.SearchQueryDTO;
 import com.example.demo.model.entity.SearchQuery;
-import com.example.demo.model.exception.BadRequestException;
-import com.example.demo.model.exception.UserNotFoundException;
 import com.example.demo.repository.SearchQueryRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.contracts.SearchService;
-import com.example.demo.service.contracts.UserService;
+import com.example.demo.service.contracts.UserValidationService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -27,7 +25,7 @@ public class SearchServiceImpl implements SearchService {
     private final UserRepository userRepository;
     private final PostDAO postDAO;
     private final SearchQueryRepository searchQueryRepository;
-    private final UserService userService;
+    private final UserValidationService userValidationService;
     private final JwtService jwtService;
 
     @Override
@@ -54,7 +52,7 @@ public class SearchServiceImpl implements SearchService {
     @Override
     public List<SearchQueryDTO> getSearchHistory(String authToken) {
         return searchQueryRepository
-                .findAllByUserOrderByDateCreatedDesc(userService.findUserById(jwtService.extractUserId(authToken)))
+                .findAllByUserOrderByDateCreatedDesc(userValidationService.findUserById(jwtService.extractUserId(authToken)))
                 .stream()
                 .map(searchQuery -> new SearchQueryDTO(searchQuery.getId(), searchQuery.getSearchQuery()))
                 .toList();
@@ -62,7 +60,7 @@ public class SearchServiceImpl implements SearchService {
     @Transactional
     @Override
     public void clearSearchHistory(String authToken) {
-        searchQueryRepository.deleteAllByUser(userService.findUserById(jwtService.extractUserId(authToken)));
+        searchQueryRepository.deleteAllByUser(userValidationService.findUserById(jwtService.extractUserId(authToken)));
     }
 
     @Override
@@ -73,7 +71,7 @@ public class SearchServiceImpl implements SearchService {
     private void saveSearchQuery(String query, String authToken){
         SearchQuery searchQuery = SearchQuery
                 .builder()
-                .user(userService.findUserById(jwtService.extractUserId(authToken)))
+                .user(userValidationService.findUserById(jwtService.extractUserId(authToken)))
                 .searchQuery(query)
                 .dateCreated(LocalDateTime.now())
                 .build();

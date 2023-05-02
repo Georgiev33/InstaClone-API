@@ -58,7 +58,7 @@ public class MessageService {
     }
 
     public List<MessageResponse> getPageOfMessages(long otherUserId, int offset, int limit, String authToken) {
-        userValidationService.validateUserById(otherUserId);
+        userValidationService.throwExceptionIfUserNotFound(otherUserId);
         long senderId = jwtService.extractUserId(authToken);
         String topicName = generateRoomName(senderId, otherUserId);
         List<MessageResponse> messageResponses = new ArrayList<>();

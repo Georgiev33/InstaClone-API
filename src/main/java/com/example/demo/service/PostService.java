@@ -130,7 +130,7 @@ public class PostService {
         if (users.isEmpty()) return Collections.emptySet();
         Set<User> userList = users.get()
                 .stream()
-                .map(userValidationService::findUserByUsername)
+                .map(userValidationService::getUserOrThrowException)
                 .collect(Collectors.toSet());
         notificationService.addNotification(userList, creator.getUsername() + TAGGED_YOU_IN_HIS_POST);
         return userList;

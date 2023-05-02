@@ -40,9 +40,9 @@ public class UserServiceImpl implements UserService {
                         userLoginDTO.getPassword()
                 )
         );
-        User user = userValidationService.validateUsernameForLogin(userLoginDTO.getUsername());
-        userValidationService.isUserBanned(user.getId());
-        userValidationService.isUserVerified(user.isVerified());
+        User user = userValidationService.getUsernameForLoginOrThrowException(userLoginDTO.getUsername());
+        userValidationService.throwExceptionIfUserIsBanned(user.getId());
+        userValidationService.throwExceptionIfUserNotVerified(user.isVerified());
         return jwtService.generateToken(Map.of("USER_ID", user.getId()), user);
     }
     @Override
@@ -89,8 +89,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException, BannedUserException {
-        User user = userValidationService.validateUsernameForLogin(username);
-        userValidationService.isUserBanned(user.getId());
+        User user = userValidationService.getUsernameForLoginOrThrowException(username);
+        userValidationService.throwExceptionIfUserIsBanned(user.getId());
         return user;
     }
     @Override
