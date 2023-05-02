@@ -5,7 +5,7 @@ import com.example.demo.model.dto.StoryResponseDTO;
 import com.example.demo.model.entity.*;
 import com.example.demo.model.exception.NotFoundException;
 import com.example.demo.repository.*;
-import com.example.demo.service.contracts.UserService;
+import com.example.demo.service.contracts.UserValidationService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ import static com.example.demo.util.Constants.*;
 @RequiredArgsConstructor
 public class StoryService {
     private final FileService fileService;
-    private final UserService userService;
+    private final UserValidationService userValidationService;
     private final StoryRepository storyRepository;
     private final NotificationService notificationService;
     private final HashTagService hashTagService;
@@ -31,7 +31,7 @@ public class StoryService {
     @Transactional
     public StoryResponseDTO createStory(CreateStoryDTO dto, String authToken) {
         long userId = jwtService.extractUserId(authToken);
-        User user = userService.findUserById(userId);
+        User user = userValidationService.findUserById(userId);
         Story story = Story.builder()
                 .dateCreated(LocalDateTime.now())
                 .expirationDate(LocalDateTime.now().plusHours(24))
@@ -57,7 +57,7 @@ public class StoryService {
     @Transactional
     public void react(String authToken, long storyId, boolean status) {
         long userId = jwtService.extractUserId(authToken);
-        User user = userService.findUserById(userId);
+        User user = userValidationService.findUserById(userId);
         Story story = findStoryById(storyId);
 
         if (deleteReactionIfStatusMatches(userId, storyId, status)) {
@@ -96,7 +96,7 @@ public class StoryService {
         if (users.isEmpty()) return Collections.emptySet();
         Set<User> userList = users.get()
                 .stream()
-                .map(userService::findUserByUsername)
+                .map(userValidationService::findUserByUsername)
                 .collect(Collectors.toSet());
         notificationService.addNotification(userList, creator.getUsername() + TAGGED_YOU_IN_HIS_STORY);
         return userList;

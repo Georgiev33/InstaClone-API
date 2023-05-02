@@ -6,7 +6,7 @@ import com.example.demo.model.entity.Notification;
 import com.example.demo.model.entity.User;
 
 import com.example.demo.repository.NotificationRepository;
-import com.example.demo.service.contracts.UserService;
+import com.example.demo.service.contracts.UserValidationService;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.*;
@@ -23,7 +23,7 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class MessageService {
-    private final UserService userService;
+    private final UserValidationService userValidationService;
     private final JwtService jwtService;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final KafkaAdmin kafkaAdmin;
@@ -32,9 +32,9 @@ public class MessageService {
 
 
     public void sendMessage(String message, long receiverId, String token) {
-        User receiver = userService.findUserById(receiverId);
+        User receiver = userValidationService.findUserById(receiverId);
         long senderId = jwtService.extractUserId(token);
-        User sender = userService.findUserById(senderId);
+        User sender = userValidationService.findUserById(senderId);
         String topicName = generateRoomName(senderId, receiverId);
         NewTopic chatRoomTopic = new NewTopic(topicName, 2, (short) 1);
         kafkaAdmin.createOrModifyTopics(chatRoomTopic);
@@ -58,7 +58,7 @@ public class MessageService {
     }
 
     public List<MessageResponse> getPageOfMessages(long otherUserId, int offset, int limit, String authToken) {
-        userService.validateUserById(otherUserId);
+        userValidationService.validateUserById(otherUserId);
         long senderId = jwtService.extractUserId(authToken);
         String topicName = generateRoomName(senderId, otherUserId);
         List<MessageResponse> messageResponses = new ArrayList<>();

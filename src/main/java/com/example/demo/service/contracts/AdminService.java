@@ -8,7 +8,6 @@ import com.example.demo.model.exception.ReportedUserAlreadyExist;
 import com.example.demo.model.exception.UserNotFoundException;
 
 import java.util.List;
-
 public interface AdminService {
    void hasPermission(User targetUser) throws AccessDeniedException;
 
@@ -16,5 +15,4 @@ public interface AdminService {
             throws ReportedUserAlreadyExist, UserNotFoundException;
 
     List<ReportedUsersResponseDTO> getReports();
-
 }

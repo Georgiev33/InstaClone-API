@@ -22,6 +22,7 @@ public class SecurityConfig {
     private final AuthenticationProvider authenticationProvider;
     private final CustomLogoutHandler logoutHandler;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final BannedAuthenticationFilter bannedAuthenticationFilter;
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -43,6 +44,7 @@ public class SecurityConfig {
                 .and()
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(bannedAuthenticationFilter, JwtAuthenticationFilter.class)
                 .logout()
                 .logoutUrl("/user/logout")
                 .addLogoutHandler(logoutHandler)

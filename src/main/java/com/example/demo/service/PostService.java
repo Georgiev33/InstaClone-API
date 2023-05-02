@@ -8,7 +8,7 @@ import com.example.demo.model.exception.NotFoundException;
 import com.example.demo.repository.PostContentRepository;
 import com.example.demo.repository.PostRepository;
 import com.example.demo.repository.UserPostReactionRepository;
-import com.example.demo.service.contracts.UserService;
+import com.example.demo.service.contracts.UserValidationService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -27,7 +27,7 @@ import static com.example.demo.util.Constants.*;
 @RequiredArgsConstructor
 public class PostService {
     private final FileService fileService;
-    private final UserService userService;
+    private final UserValidationService userValidationService;
     private final PostRepository postRepository;
     private final PostContentRepository contentRepository;
     private final HashTagService hashTagService;
@@ -38,7 +38,7 @@ public class PostService {
     @Transactional
     public PostResponseDTO createPost(CreatePostDTO dto, String authToken) {
         long userId = jwtService.extractUserId(authToken);
-        User user = userService.findUserById(userId);
+        User user = userValidationService.findUserById(userId);
         Post post = Post.builder()
                 .dateCreated(LocalDateTime.now())
                 .caption(dto.caption())
@@ -83,7 +83,7 @@ public class PostService {
     @Transactional
     public void react(String authToken, long postId, boolean status) {
         long userId = jwtService.extractUserId(authToken);
-        User user = userService.findUserById(userId);
+        User user = userValidationService.findUserById(userId);
         Post post = findPostById(postId);
 
         if (deleteReactionIfStatusMatches(userId, postId, status)) {
@@ -130,7 +130,7 @@ public class PostService {
         if (users.isEmpty()) return Collections.emptySet();
         Set<User> userList = users.get()
                 .stream()
-                .map(userService::findUserByUsername)
+                .map(userValidationService::findUserByUsername)
                 .collect(Collectors.toSet());
         notificationService.addNotification(userList, creator.getUsername() + TAGGED_YOU_IN_HIS_POST);
         return userList;

@@ -7,10 +7,9 @@ import com.example.demo.model.entity.User;
 import com.example.demo.model.exception.AccessDeniedException;
 import com.example.demo.model.exception.ReportedUserAlreadyExist;
 import com.example.demo.model.exception.UserNotFoundException;
-import com.example.demo.repository.BannedUsersRepository;
 import com.example.demo.repository.ReportedUsersRepository;
 import com.example.demo.service.contracts.AdminService;
-import com.example.demo.service.contracts.UserService;
+import com.example.demo.service.contracts.UserValidationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -27,10 +26,9 @@ import static com.example.demo.util.Constants.ADMIN;
 @Service
 @RequiredArgsConstructor
 public class AdminServiceImpl implements AdminService {
-    private final BannedUsersRepository bannedUsersRepository;
     private final ReportedUsersRepository reportedUsersRepository;
     private final JwtService jwtService;
-    private final UserService userService;
+    private final UserValidationService userValidationService;
 
 
     public void reportUser(ReportUserDTO reportUserDTO, String authToken)
@@ -39,7 +37,7 @@ public class AdminServiceImpl implements AdminService {
         if (isReportExist(reporterId, reportUserDTO.reportedId())) {
             throw new ReportedUserAlreadyExist("User with id" + reportUserDTO.reportedId() + " is already reported");
         }
-        userService.validateUserById(reportUserDTO.reportedId());
+        userValidationService.validateUserById(reportUserDTO.reportedId());
         reportedUsersRepository.save(ReportedUsers.builder()
                 .reporterId(reporterId)
                 .reportedId(reportUserDTO.reportedId())
@@ -54,7 +52,6 @@ public class AdminServiceImpl implements AdminService {
                         .toList())
                 .orElseGet(ArrayList::new);
     }
-
 
     public void hasPermission(User targetUser) throws AccessDeniedException {
         if (targetUser.isPrivate() && !isLoggedUserAdmin() && isLoggedUserFollow(targetUser)) {
