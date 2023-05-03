@@ -1,11 +1,14 @@
 package com.example.demo.service;
 
+import com.example.demo.model.dto.ReportedUsers.ReportUserDTO;
 import com.example.demo.model.dto.User.UserLoginDTO;
 import com.example.demo.model.dto.User.UserRegistrationDTO;
 import com.example.demo.model.dto.User.UserUpdateDTO;
 import com.example.demo.model.dto.User.UserWithUsernameAndIdDTO;
+import com.example.demo.model.entity.report.ReportedUser;
 import com.example.demo.model.entity.User;
 import com.example.demo.model.exception.*;
+import com.example.demo.repository.report.ReportedUserRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.contracts.UserService;
 import com.example.demo.service.contracts.UserValidationService;
@@ -31,7 +34,8 @@ public class UserServiceImpl implements UserService {
     private final MailService mailService;
     private final JwtService jwtService;
     private final RoleService roleService;
-@Override
+    private final ReportedUserRepository reportedUsersRepository;
+    @Override
     public String login(UserLoginDTO userLoginDTO) throws BannedUserException,
             UsernameNotFoundException, UserNotVerifiedException {
         authenticationManager.authenticate(
@@ -126,5 +130,22 @@ public class UserServiceImpl implements UserService {
                 .bio(user.getBio())
                 .build();
         userRepository.save(updatedUser);
+    }
+    @Override
+    public void reportUser(ReportUserDTO reportUserDTO, String authToken)
+            throws ReportedUserAlreadyExist, UserNotFoundException {
+        final long reporterId = jwtService.extractUserId(authToken);
+        if (isReportExist(reporterId, reportUserDTO.reportedId())) {
+            throw new ReportedUserAlreadyExist("User with id" + reportUserDTO.reportedId() + " is already reported");
+        }
+        userValidationService.throwExceptionIfUserNotFound(reportUserDTO.reportedId());
+        reportedUsersRepository.save(ReportedUser.builder()
+                .reporterId(reporterId)
+                .reportedId(reportUserDTO.reportedId())
+                .reason(reportUserDTO.reason())
+                .build());
+    }
+    private boolean isReportExist(long reporterId, long reportedId) {
+        return reportedUsersRepository.findByReporterIdAndReportedId(reporterId, reportedId).isPresent();
     }
 }

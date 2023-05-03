@@ -1,18 +1,19 @@
 package com.example.demo.service.contracts;
 
-import com.example.demo.model.dto.ReportedUsers.ReportUserDTO;
+
+import com.example.demo.model.dto.ReportedUsers.ReportHistoryResponseDTO;
 import com.example.demo.model.dto.ReportedUsers.ReportedUsersResponseDTO;
+import com.example.demo.model.dto.banUser.HandleReportDTO;
 import com.example.demo.model.entity.User;
 import com.example.demo.model.exception.AccessDeniedException;
-import com.example.demo.model.exception.ReportedUserAlreadyExist;
-import com.example.demo.model.exception.UserNotFoundException;
+import com.example.demo.model.exception.ReportNotFoundException;
+import org.springframework.data.domain.Page;
 
-import java.util.List;
 public interface AdminService {
    void hasPermission(User targetUser) throws AccessDeniedException;
+    Page<ReportHistoryResponseDTO> getReportHistory(long reportedId, int page, int size) throws ReportNotFoundException;
 
-    void reportUser(ReportUserDTO reportUserDTO, String authToken)
-            throws ReportedUserAlreadyExist, UserNotFoundException;
+    void handleReport(String authToken, HandleReportDTO handleReportDTO) throws ReportNotFoundException;
 
-    List<ReportedUsersResponseDTO> getReports();
+    Page<ReportedUsersResponseDTO> getActiveReports(long reportedId, int page, int size);
 }

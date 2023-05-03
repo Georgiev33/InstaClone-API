@@ -1,31 +1,29 @@
-package com.example.demo.model.entity.Ban;
+package com.example.demo.model.entity.ban;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 
-@Entity(name = "banned_users")
+@Entity(name = "ban_history")
 @Getter
 @NoArgsConstructor
-public class BannedUsers {
-    public BannedUsers(long bannedId, long adminId, String reason, LocalDateTime banStartDate, LocalDateTime banEndDate) {
-        this.bannedId = bannedId;
-        this.adminId = adminId;
-        this.reason = reason;
-        this.banStartDate = banStartDate;
-        this.banEndDate = banEndDate;
-    }
-
+@AllArgsConstructor
+@Builder
+public class BanHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private long bannedId;
+    private long bannedUserId;
     private long adminId;
     private String reason;
     private LocalDateTime banStartDate;
     private LocalDateTime banEndDate;
+    private boolean isBanned;
 }

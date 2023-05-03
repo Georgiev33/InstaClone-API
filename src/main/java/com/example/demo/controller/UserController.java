@@ -33,7 +33,7 @@ public class UserController {
 
     @PostMapping("/report")
     public void reportUser(@RequestBody ReportUserDTO reportUserDTO, @RequestHeader("Authorization") String authToken) {
-        adminService.reportUser(reportUserDTO, authToken);
+        userService.reportUser(reportUserDTO, authToken);
     }
 
     @PutMapping()
@@ -48,7 +48,6 @@ public class UserController {
 
     @PostMapping("/register")
     public void createUser(@RequestBody UserRegistrationDTO userRegistrationDTO) {
-        System.out.println("test");
         userService.createUser(userRegistrationDTO);
     }
 

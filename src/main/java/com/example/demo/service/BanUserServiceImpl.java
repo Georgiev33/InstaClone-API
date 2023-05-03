@@ -3,14 +3,14 @@ package com.example.demo.service;
 import com.example.demo.model.dto.BanHistoryDTO;
 import com.example.demo.model.dto.banUser.BanUserDTO;
 import com.example.demo.model.dto.banUser.UnbanUserDTO;
-import com.example.demo.model.entity.Ban.BanHistory;
-import com.example.demo.model.entity.Ban.BannedUsers;
+import com.example.demo.model.entity.ban.BanHistory;
+import com.example.demo.model.entity.ban.BannedUsers;
 import com.example.demo.model.exception.BannedUserException;
 import com.example.demo.model.exception.UserAlreadyBannedException;
 import com.example.demo.model.exception.UserNotBannedException;
 import com.example.demo.model.exception.UserNotFoundException;
-import com.example.demo.repository.Ban.BannedHistory;
-import com.example.demo.repository.Ban.BannedUsersRepository;
+import com.example.demo.repository.ban.BannedHistory;
+import com.example.demo.repository.ban.BannedUsersRepository;
 import com.example.demo.service.contracts.BanUserService;
 import com.example.demo.service.contracts.UserValidationService;
 import jakarta.transaction.Transactional;
@@ -49,6 +49,7 @@ public class BanUserServiceImpl implements BanUserService {
                 .adminId(adminId)
                 .banStartDate(LocalDateTime.now())
                 .banEndDate(LocalDateTime.now().plusHours(banUserDTO.hoursToBan()))
+                .reason(banUserDTO.reason())
                 .isBanned(true)
                 .build());
 
@@ -64,6 +65,7 @@ public class BanUserServiceImpl implements BanUserService {
                 .bannedUserId(unbanUserDTO.userIdToUnban())
                 .adminId(adminId)
                 .banEndDate(LocalDateTime.now())
+                .reason(unbanUserDTO.reason())
                 .isBanned(false)
                 .build());
     }

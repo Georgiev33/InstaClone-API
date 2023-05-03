@@ -1,6 +1,6 @@
-package com.example.demo.repository.Ban;
+package com.example.demo.repository.ban;
 
-import com.example.demo.model.entity.Ban.BannedUsers;
+import com.example.demo.model.entity.ban.BannedUsers;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

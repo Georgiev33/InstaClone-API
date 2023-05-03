@@ -1,5 +1,6 @@
 package com.example.demo.service.contracts;
 
+import com.example.demo.model.dto.ReportedUsers.ReportUserDTO;
 import com.example.demo.model.dto.User.UserLoginDTO;
 import com.example.demo.model.dto.User.UserRegistrationDTO;
 import com.example.demo.model.dto.User.UserUpdateDTO;
@@ -20,11 +21,12 @@ public interface UserService extends UserDetailsService {
 
     void followUser(long followedUserId, String authToken) throws UserNotFoundException;
 
-
     List<UserWithUsernameAndIdDTO> getFollowers(String authToken);
 
     List<UserWithUsernameAndIdDTO> getFollowing(String authToken);
 
     void setPrivateUser(String authToken);
 
+    void reportUser(ReportUserDTO reportUserDTO, String authToken)
+            throws ReportedUserAlreadyExist, UserNotFoundException;
 }
