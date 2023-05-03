@@ -20,7 +20,7 @@ public class ExceptionController extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(value = {NotFoundException.class, UsernameNotFoundException.class,
-            UsernameNotFoundException.class, UserNotBannedException.class})
+            UsernameNotFoundException.class, UserNotBannedException.class, UserNotFoundException.class})
     @ResponseStatus(code = HttpStatus.NOT_FOUND)
     private ProblemDetail handleNotFound(Exception ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());

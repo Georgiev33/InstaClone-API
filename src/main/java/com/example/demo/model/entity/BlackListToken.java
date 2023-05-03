@@ -5,7 +5,6 @@ import jakarta.persistence.Id;
 import lombok.*;
 
 @Entity(name = "blacklisted_tokens")
-@Setter
 @Getter
 @NoArgsConstructor
 public class BlackListToken {

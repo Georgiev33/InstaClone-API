@@ -1,4 +1,4 @@
-package com.example.demo.model.entity;
+package com.example.demo.model.entity.Ban;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -6,13 +6,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import java.time.LocalDateTime;
 
 @Entity(name = "banned_users")
 @Getter
-@Setter
 @NoArgsConstructor
 public class BannedUsers {
     public BannedUsers(long bannedId, long adminId, String reason, LocalDateTime banStartDate, LocalDateTime banEndDate) {

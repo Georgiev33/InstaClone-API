@@ -3,7 +3,7 @@ package com.example.demo.service;
 import com.example.demo.model.dto.User.UserRegistrationDTO;
 import com.example.demo.model.entity.User;
 import com.example.demo.model.exception.*;
-import com.example.demo.repository.BannedUsersRepository;
+import com.example.demo.repository.Ban.BannedUsersRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.contracts.UserValidationService;
 import lombok.RequiredArgsConstructor;

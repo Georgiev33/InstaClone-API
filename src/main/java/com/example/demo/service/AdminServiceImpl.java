@@ -30,7 +30,6 @@ public class AdminServiceImpl implements AdminService {
     private final JwtService jwtService;
     private final UserValidationService userValidationService;
 
-
     public void reportUser(ReportUserDTO reportUserDTO, String authToken)
             throws ReportedUserAlreadyExist, UserNotFoundException {
         final long reporterId = jwtService.extractUserId(authToken);
