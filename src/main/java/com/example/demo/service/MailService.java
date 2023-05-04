@@ -1,6 +1,6 @@
 package com.example.demo.service;
 
-import com.example.demo.model.dto.User.UserRegistrationDTO;
+import com.example.demo.model.dto.user.UserRegistrationDTO;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.internal.bytebuddy.utility.RandomString;
 import org.springframework.mail.MailSender;

@@ -21,6 +21,7 @@ import static com.example.demo.util.Constants.*;
 @Service
 @RequiredArgsConstructor
 public class StoryService {
+
     private final FileService fileService;
     private final UserValidationService userValidationService;
     private final StoryRepository storyRepository;
@@ -73,7 +74,7 @@ public class StoryService {
         notificationService.addNotification(story.getUser(), user.getUsername() + " liked your story.");
         userStoryReactionRepository.save(userStoryReaction);
     }
-    @Scheduled(fixedRate = 1000 )
+    @Scheduled(fixedRate = HOUR_IN_MILLISECONDS)
     @Transactional
     public void deleteExpiredStoriesEveryHour(){
         storyRepository.deleteAllByExpirationDateBefore(LocalDateTime.now());

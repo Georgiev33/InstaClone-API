@@ -1,10 +1,10 @@
 package com.example.demo.service.contracts;
 
 import com.example.demo.model.dto.ReportedUsers.ReportUserDTO;
-import com.example.demo.model.dto.User.UserLoginDTO;
-import com.example.demo.model.dto.User.UserRegistrationDTO;
-import com.example.demo.model.dto.User.UserUpdateDTO;
-import com.example.demo.model.dto.User.UserWithUsernameAndIdDTO;
+import com.example.demo.model.dto.user.UserLoginDTO;
+import com.example.demo.model.dto.user.UserRegistrationDTO;
+import com.example.demo.model.dto.user.UserUpdateDTO;
+import com.example.demo.model.dto.user.UserWithUsernameAndIdDTO;
 import com.example.demo.model.exception.*;
 import org.springframework.security.core.userdetails.UserDetailsService;
 

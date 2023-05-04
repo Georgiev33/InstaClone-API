@@ -1,19 +1,45 @@
 package com.example.demo.model.exception;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ProblemDetail;
+import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.NotNull;
+import org.springframework.http.*;
+import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException;
+import org.springframework.messaging.handler.invocation.MethodArgumentResolutionException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-@RestControllerAdvice
+import java.util.ArrayList;
+import java.util.List;
 
+@RestControllerAdvice
 public class ExceptionController extends ResponseEntityExceptionHandler {
     //TODO set type
-    @ExceptionHandler(value = {BadRequestException.class})
+
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            org.springframework.web.bind.MethodArgumentNotValidException ex,
+            HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        List<String> errorMessages = new ArrayList<>();
+        for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
+            errorMessages.add(fieldError.getDefaultMessage());
+        }
+        for (ObjectError objectError : ex.getBindingResult().getGlobalErrors()) {
+            errorMessages.add(objectError.getDefaultMessage());
+        }
+        String combinedErrorMessage = String.join("; ", errorMessages);
+        return new ResponseEntity<>(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, combinedErrorMessage),
+                HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(value = {BadRequestException.class, MethodArgumentNotValidException.class})
     @ResponseStatus(code = HttpStatus.BAD_REQUEST)
-    private ProblemDetail handleBadRequest(Exception ex) {
+    public ProblemDetail handleBadRequest(Exception ex) {
+        System.out.println(ex.getMessage());
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 

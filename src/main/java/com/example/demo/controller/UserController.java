@@ -2,14 +2,15 @@ package com.example.demo.controller;
 
 import com.example.demo.model.dto.ReportedUsers.ReportUserDTO;
 import com.example.demo.model.dto.post.PostResponseDTO;
-import com.example.demo.model.dto.User.UserLoginDTO;
-import com.example.demo.model.dto.User.UserRegistrationDTO;
-import com.example.demo.model.dto.User.UserUpdateDTO;
-import com.example.demo.model.dto.User.UserWithUsernameAndIdDTO;
+import com.example.demo.model.dto.user.UserLoginDTO;
+import com.example.demo.model.dto.user.UserRegistrationDTO;
+import com.example.demo.model.dto.user.UserUpdateDTO;
+import com.example.demo.model.dto.user.UserWithUsernameAndIdDTO;
 import com.example.demo.service.PostService;
 import com.example.demo.service.contracts.AdminService;
 import com.example.demo.service.contracts.UserService;
 import com.example.demo.service.contracts.UserValidationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,6 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
     private final PostService postService;
-    private final AdminService adminService;
     private final UserValidationService userValidationService;
 
     @GetMapping("/auth/{verificationCode}")
@@ -47,7 +47,7 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public void createUser(@RequestBody UserRegistrationDTO userRegistrationDTO) {
+    public void createUser(@RequestBody @Valid UserRegistrationDTO userRegistrationDTO) {
         userService.createUser(userRegistrationDTO);
     }
 

@@ -1,6 +1,6 @@
 package com.example.demo.service.contracts;
 
-import com.example.demo.model.dto.User.UserRegistrationDTO;
+import com.example.demo.model.dto.user.UserRegistrationDTO;
 import com.example.demo.model.entity.User;
 import com.example.demo.model.exception.*;
 import org.springframework.http.ResponseEntity;

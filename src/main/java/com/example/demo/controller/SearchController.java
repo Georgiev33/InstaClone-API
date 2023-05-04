@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.dto.User.UserWithUsernameAndIdDTO;
+import com.example.demo.model.dto.user.UserWithUsernameAndIdDTO;
 import com.example.demo.model.dto.post.PostSearchResponseDTO;
 import com.example.demo.model.dto.search.SearchQueryDTO;
 import com.example.demo.service.contracts.SearchService;

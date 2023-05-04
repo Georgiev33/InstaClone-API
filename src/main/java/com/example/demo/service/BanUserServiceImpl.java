@@ -24,6 +24,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.example.demo.util.Constants.HOUR_IN_MILLISECONDS;
+
 @Service
 @RequiredArgsConstructor
 public class BanUserServiceImpl implements BanUserService {
@@ -95,7 +97,7 @@ public class BanUserServiceImpl implements BanUserService {
                         banHistory.isBanned())).toList());
     }
 
-    @Scheduled(fixedRate = 1000 *60 *60)
+    @Scheduled(fixedRate = HOUR_IN_MILLISECONDS)
     @Transactional()
     public void unbanUsersWhichBansAreExpired(){
         List<BannedUsers> bannedUsers = bannedUsersRepository.findAllByBanEndDateBefore(LocalDateTime.now());

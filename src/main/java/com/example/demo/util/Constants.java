@@ -1,7 +1,8 @@
 package com.example.demo.util;
 
 public class Constants {
-    public static final String BAD_CREDENTIALS = "Bad credentials";
+
+    public static final int HOUR_IN_MILLISECONDS = 1000 * 60 * 60;
     public static final String YOUR_ACCOUNT_ISN_T_VERIFIED = "Your account isn`t verified";
     public static final String INVALID_VERIFICATION_CODE = "Invalid verification code";
     public static final String REGISTRATION_SUCCESSFULLY_VERIFIED = "Registration successfully verified";

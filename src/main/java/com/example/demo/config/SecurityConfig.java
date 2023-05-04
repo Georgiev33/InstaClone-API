@@ -1,5 +1,6 @@
 package com.example.demo.config;
 
+import com.example.demo.model.exception.ExceptionController;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +11,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import static com.example.demo.util.Constants.ADMIN;
@@ -23,6 +25,7 @@ public class SecurityConfig {
     private final CustomLogoutHandler logoutHandler;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final BannedAuthenticationFilter bannedAuthenticationFilter;
+    private final ExceptionController exceptionController;
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -45,6 +48,7 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(bannedAuthenticationFilter, JwtAuthenticationFilter.class)
+//                .addFilterAfter(new ExceptionHandlingFilter(exceptionController), ExceptionTranslationFilter.class)
                 .logout()
                 .logoutUrl("/user/logout")
                 .addLogoutHandler(logoutHandler)

@@ -1,10 +1,10 @@
 package com.example.demo.service;
 
 import com.example.demo.model.dto.ReportedUsers.ReportUserDTO;
-import com.example.demo.model.dto.User.UserLoginDTO;
-import com.example.demo.model.dto.User.UserRegistrationDTO;
-import com.example.demo.model.dto.User.UserUpdateDTO;
-import com.example.demo.model.dto.User.UserWithUsernameAndIdDTO;
+import com.example.demo.model.dto.user.UserLoginDTO;
+import com.example.demo.model.dto.user.UserRegistrationDTO;
+import com.example.demo.model.dto.user.UserUpdateDTO;
+import com.example.demo.model.dto.user.UserWithUsernameAndIdDTO;
 import com.example.demo.model.entity.report.ReportedUser;
 import com.example.demo.model.entity.User;
 import com.example.demo.model.exception.*;
