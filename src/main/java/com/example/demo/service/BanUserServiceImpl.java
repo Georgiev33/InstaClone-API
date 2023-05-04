@@ -18,9 +18,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -91,6 +93,20 @@ public class BanUserServiceImpl implements BanUserService {
                         banHistory.getBanStartDate(),
                         banHistory.getBanEndDate(),
                         banHistory.isBanned())).toList());
+    }
+
+    @Scheduled(fixedRate = 1000 *60 *60)
+    @Transactional()
+    public void unbanUsersWhichBansAreExpired(){
+        List<BannedUsers> bannedUsers = bannedUsersRepository.findAllByBanEndDateBefore(LocalDateTime.now());
+        bannedUsersRepository.deleteAll(bannedUsers);
+        bannedHistory.saveAll(bannedUsers.stream().map(bu ->BanHistory.builder()
+                .bannedUserId(bu.getBannedId())
+                .adminId(-1)
+                .banEndDate(LocalDateTime.now())
+                .reason("Cron job auto unban")
+                .isBanned(false)
+                .build()).toList());
     }
 
     private BannedUsers findBannedUser(Long userId) throws BannedUserException {
