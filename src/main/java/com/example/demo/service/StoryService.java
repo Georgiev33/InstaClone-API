@@ -8,6 +8,7 @@ import com.example.demo.repository.*;
 import com.example.demo.service.contracts.UserValidationService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -71,6 +72,11 @@ public class StoryService {
                 .build();
         notificationService.addNotification(story.getUser(), user.getUsername() + " liked your story.");
         userStoryReactionRepository.save(userStoryReaction);
+    }
+    @Scheduled(fixedRate = 1000 )
+    @Transactional
+    public void deleteExpiredStoriesEveryHour(){
+        storyRepository.deleteAllByExpirationDateBefore(LocalDateTime.now());
     }
 
     private StoryResponseDTO mapStoryToStoryResponseDTO(Story saved) {
