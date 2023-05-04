@@ -1,6 +1,7 @@
 package com.example.demo.model.entity;
 
 import com.example.demo.model.Postable;
+import com.example.demo.model.entity.post.Post;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,9 +16,11 @@ import java.util.Set;
 public class Comment implements Postable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
     @ManyToOne
     private User user;
+    @Column(name = "content")
     private String content;
     @ManyToOne
     private Post post;
@@ -39,6 +42,6 @@ public class Comment implements Postable {
             inverseJoinColumns = @JoinColumn(name = "hashtag_id")
     )
     private Set<Hashtag> hashtags = new HashSet<>();
-
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 }

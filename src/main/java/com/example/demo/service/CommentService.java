@@ -3,6 +3,7 @@ package com.example.demo.service;
 import com.example.demo.model.dto.CommentResponseDTO;
 import com.example.demo.model.dto.CreateCommentDTO;
 import com.example.demo.model.entity.*;
+import com.example.demo.model.entity.post.Post;
 import com.example.demo.model.exception.BadRequestException;
 import com.example.demo.model.exception.NotFoundException;
 import com.example.demo.repository.CommentRepository;

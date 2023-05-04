@@ -1,5 +1,9 @@
-package com.example.demo.model.entity;
+package com.example.demo.model.entity.post;
 import com.example.demo.model.Postable;
+import com.example.demo.model.entity.Comment;
+import com.example.demo.model.entity.Hashtag;
+import com.example.demo.model.entity.User;
+import com.example.demo.model.entity.UserPostReaction;
 import jakarta.persistence.*;
 import lombok.*;
 

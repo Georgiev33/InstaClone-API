@@ -1,5 +1,6 @@
 package com.example.demo.model.entity;
 
+import com.example.demo.model.entity.post.Post;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

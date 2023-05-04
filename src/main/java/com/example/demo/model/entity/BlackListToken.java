@@ -1,5 +1,6 @@
 package com.example.demo.model.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.*;
@@ -12,5 +13,6 @@ public class BlackListToken {
         this.token = token;
     }
     @Id
+    @Column(name = "token")
     private String token;
 }

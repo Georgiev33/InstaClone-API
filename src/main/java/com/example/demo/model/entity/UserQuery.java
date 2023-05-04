@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SearchQuery {
+public class UserQuery {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;

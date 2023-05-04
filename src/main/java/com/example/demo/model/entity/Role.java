@@ -15,10 +15,11 @@ import java.util.Set;
 public class Role implements GrantedAuthority {
     @Id
     private Long id;
+    @Column(name = "authority")
     private String authority;
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-            name = "user_autorities",
+            name = "user_authorities",
             joinColumns = @JoinColumn(name = "autority_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )

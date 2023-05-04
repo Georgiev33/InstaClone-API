@@ -14,9 +14,9 @@ public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column
+    @Column(name = "notification")
     private String notification;
-    @Column
+    @Column(name = "date_created")
     private LocalDateTime dateCreated;
     @ManyToOne
     @JoinColumn(name = "user_id")

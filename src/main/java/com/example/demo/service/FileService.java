@@ -1,7 +1,7 @@
 package com.example.demo.service;
 
-import com.example.demo.model.entity.Post;
-import com.example.demo.model.entity.PostContent;
+import com.example.demo.model.entity.post.Post;
+import com.example.demo.model.entity.post.PostContent;
 import com.example.demo.model.exception.BadRequestException;
 import com.example.demo.model.exception.InvalidMultipartFileException;
 import com.example.demo.repository.PostContentRepository;

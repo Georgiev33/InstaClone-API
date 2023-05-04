@@ -1,5 +1,6 @@
 package com.example.demo.model.entity;
 
+import com.example.demo.model.entity.post.Post;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -48,13 +49,13 @@ public class User implements UserDetails {
     private Set<Notification> notifications;
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "user_autorities",
+            name = "user_authorities",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "autority_id")
     )
     private List<Role> roles;
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    private Set<SearchQuery> queries;
+    private Set<UserQuery> queries;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles;

@@ -2,7 +2,7 @@
 //
 //import com.example.demo.model.dto.post.CreatePostDTO;
 //import com.example.demo.model.dto.post.PostResponseDTO;
-//import com.example.demo.model.entity.Post;
+//import com.example.demo.model.entity.post.Post;
 //import com.example.demo.model.entity.User;
 //import com.example.demo.model.exception.BadRequestException;
 //import com.example.demo.model.exception.NotFoundException;

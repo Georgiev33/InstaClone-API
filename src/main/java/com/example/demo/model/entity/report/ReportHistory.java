@@ -1,9 +1,6 @@
 package com.example.demo.model.entity.report;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,10 +14,16 @@ import lombok.RequiredArgsConstructor;
 public class ReportHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private long id;
+    @Column(name = "reporter_id")
     private long reporterId;
+    @Column(name = "reported_id")
     private long reportedId;
+    @Column(name = "reason")
     private String reason;
+    @Column(name = "status")
     private boolean status;
+    @Column(name = "admin_id")
     private long adminId;
 }

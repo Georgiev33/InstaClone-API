@@ -1,5 +1,6 @@
 package com.example.demo.model.entity;
 
+import com.example.demo.model.entity.post.Post;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,6 +25,7 @@ public class UserPostReaction {
     @MapsId("userId")
     @JoinColumn(name = "user_id")
     private User user;
+    @Column(name = "status")
     private boolean status;
 
     @Embeddable

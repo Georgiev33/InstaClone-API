@@ -25,6 +25,7 @@ public class UserStoryReaction {
     @MapsId("userId")
     @JoinColumn(name = "user_id")
     private User user;
+    @Column(name = "status")
     private boolean status;
 
     @Embeddable
