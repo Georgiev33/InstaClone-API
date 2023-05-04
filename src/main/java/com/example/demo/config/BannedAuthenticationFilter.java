@@ -1,5 +1,6 @@
 package com.example.demo.config;
 
+import com.example.demo.model.exception.ExceptionController;
 import com.example.demo.service.JwtService;
 import com.example.demo.service.contracts.UserValidationService;
 import jakarta.servlet.FilterChain;
@@ -7,6 +8,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -30,10 +32,7 @@ public class BannedAuthenticationFilter extends OncePerRequestFilter {
         if (authentication != null && authentication.isAuthenticated()) {
             if(validationService.isUserBanned(jwtService.extractUserId(authHeader))){
                 SecurityContextHolder.clearContext();
-                response.setContentType("application/json");
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                String jsonResponse = "{\"error\": \"You are banned from accessing this resource.\"}";
-                response.getWriter().write(jsonResponse);
+                ExceptionController.response(response, HttpStatus.FORBIDDEN, "You are banned from accessing this resource");
                 return;
             }
         }

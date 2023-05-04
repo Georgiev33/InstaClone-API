@@ -1,10 +1,9 @@
 package com.example.demo.model.exception;
 
-import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotNull;
+import io.jsonwebtoken.ExpiredJwtException;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.*;
 import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException;
-import org.springframework.messaging.handler.invocation.MethodArgumentResolutionException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
@@ -13,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,9 +55,20 @@ public class ExceptionController extends ResponseEntityExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
     }
 
-    @ExceptionHandler(value = {BannedUserException.class, UserNotVerifiedException.class})
+    @ExceptionHandler(value = {BannedUserException.class, UserNotVerifiedException.class, ExpiredJwtException.class})
     @ResponseStatus(code = HttpStatus.FORBIDDEN)
     private ProblemDetail handlePermissionDenied(Exception ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, ex.getMessage());
+    }
+
+    public static void response(HttpServletResponse response, HttpStatus statusCode, String errorMessage) throws IOException {
+        response.setContentType("application/json");
+        response.setStatus(statusCode.value());
+        String json =
+                "    \"type\": \"about:blank\",\n" +
+                        "    \"status\": \"" + statusCode.value() + "\",\n" +
+                        "    \"status\": \"" + statusCode.value() + "\",\n" +
+                        "    \"detail\": \"" + errorMessage + "\",\n";
+        response.getWriter().write(json);
     }
 }

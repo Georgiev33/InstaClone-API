@@ -48,7 +48,6 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(bannedAuthenticationFilter, JwtAuthenticationFilter.class)
-//                .addFilterAfter(new ExceptionHandlingFilter(exceptionController), ExceptionTranslationFilter.class)
                 .logout()
                 .logoutUrl("/user/logout")
                 .addLogoutHandler(logoutHandler)

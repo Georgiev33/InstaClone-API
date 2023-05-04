@@ -4,6 +4,7 @@ import com.example.demo.model.entity.BlackListToken;
 import com.example.demo.model.exception.BadRequestException;
 import com.example.demo.repository.BlackListedTokenRepository;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -29,7 +30,7 @@ public class JwtService {
         blackListedTokenRepository.save(new BlackListToken(token.substring(7)));
     }
 
-    public String extractUsername(String jwtToken) {
+    public String extractUsername(String jwtToken) throws ExpiredJwtException {
         return extractClaim(jwtToken, Claims::getSubject);
     }
 

@@ -1,12 +1,15 @@
 package com.example.demo.config;
 
+import com.example.demo.model.exception.ExceptionController;
 import com.example.demo.service.JwtService;
 import com.sun.istack.NotNull;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,12 +21,14 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
     private static final String BEARER = "Bearer ";
+
     @Override
     protected void doFilterInternal(
             @NotNull HttpServletRequest request,
@@ -39,7 +44,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
         jwtToken = authHeader.substring(7);
-        username = jwtService.extractUsername(jwtToken);
+        try {
+            username = jwtService.extractUsername(jwtToken);
+        } catch (ExpiredJwtException ex) {
+            ExceptionController.response(response, HttpStatus.UNAUTHORIZED,
+                    "JWT token expired. Please log in again.");
+            return;
+        }
+
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
             if (jwtService.isTokenValid(jwtToken, userDetails)) {
