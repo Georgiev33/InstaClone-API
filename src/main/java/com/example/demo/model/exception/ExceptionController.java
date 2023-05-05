@@ -6,6 +6,7 @@ import org.springframework.http.*;
 import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
@@ -24,22 +25,21 @@ public class ExceptionController extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
             org.springframework.web.bind.MethodArgumentNotValidException ex,
             HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-        List<String> errorMessages = new ArrayList<>();
-        for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
-            errorMessages.add(fieldError.getDefaultMessage());
-        }
-        for (ObjectError objectError : ex.getBindingResult().getGlobalErrors()) {
-            errorMessages.add(objectError.getDefaultMessage());
-        }
-        String combinedErrorMessage = String.join("; ", errorMessages);
-        return new ResponseEntity<>(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, combinedErrorMessage),
+        String validationErrorMessage = extractValidationErrorMessage(ex);
+        return new ResponseEntity<>(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, validationErrorMessage),
+                HttpStatus.BAD_REQUEST);
+    }
+    @Override
+    protected ResponseEntity<Object> handleBindException(
+            BindException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        String validationErrorMessage = extractValidationErrorMessage(ex);
+        return new ResponseEntity<>(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, validationErrorMessage),
                 HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(value = {BadRequestException.class, MethodArgumentNotValidException.class})
+    @ExceptionHandler(value = {BadRequestException.class})
     @ResponseStatus(code = HttpStatus.BAD_REQUEST)
     public ProblemDetail handleBadRequest(Exception ex) {
-        System.out.println(ex.getMessage());
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
@@ -66,9 +66,19 @@ public class ExceptionController extends ResponseEntityExceptionHandler {
         response.setStatus(statusCode.value());
         String json =
                 "    \"type\": \"about:blank\",\n" +
-                        "    \"status\": \"" + statusCode.value() + "\",\n" +
+                        "    \"title:\": \"" + statusCode.name() + "\",\n" +
                         "    \"status\": \"" + statusCode.value() + "\",\n" +
                         "    \"detail\": \"" + errorMessage + "\",\n";
         response.getWriter().write(json);
+    }
+    private String extractValidationErrorMessage(BindException ex) {
+        List<String> errorMessages = new ArrayList<>();
+        for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
+            errorMessages.add(fieldError.getDefaultMessage());
+        }
+        for (ObjectError objectError : ex.getBindingResult().getGlobalErrors()) {
+            errorMessages.add(objectError.getDefaultMessage());
+        }
+        return String.join("; ", errorMessages);
     }
 }

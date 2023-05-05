@@ -1,6 +1,4 @@
 package com.example.demo.model.dto.user;
 
-import jakarta.validation.constraints.NotNull;
-
-public record UserUpdateDTO(@NotNull String bio) {
+public record UserUpdateDTO(String bio) {
 }

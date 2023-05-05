@@ -32,7 +32,7 @@ public class UserController {
     }
 
     @PostMapping("/report")
-    public void reportUser(@RequestBody ReportUserDTO reportUserDTO, @RequestHeader("Authorization") String authToken) {
+    public void reportUser(@RequestBody @Valid ReportUserDTO reportUserDTO, @RequestHeader("Authorization") String authToken) {
         userService.reportUser(reportUserDTO, authToken);
     }
 

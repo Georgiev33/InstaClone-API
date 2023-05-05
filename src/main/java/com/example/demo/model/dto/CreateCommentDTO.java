@@ -1,18 +1,13 @@
 package com.example.demo.model.dto;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 
-import lombok.Getter;
-import lombok.Setter;
-
-import java.util.ArrayList;
 import java.util.List;
 
-@Getter
-@Setter
-public class CreateCommentDTO {
-    private Long postId;
-    private String content;
-    private Long repliedCommentId;
-    private List<String> hashtags = new ArrayList<>();
-    private List<String> taggedUsers = new ArrayList<>();
 
+public record CreateCommentDTO(@Positive(message = "Invalid post id. Must be a positive integer.") long postId,
+                               @NotBlank(message = "Content can't be empty or null.") String content,
+                               @Positive(message = "Invalid comment id. Must be a positive integer.")Long repliedCommentId,
+                               List<String> hashtags,
+                               List<String> taggedUsers) {
 }

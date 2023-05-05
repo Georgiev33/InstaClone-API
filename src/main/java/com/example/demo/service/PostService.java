@@ -12,6 +12,7 @@ import com.example.demo.repository.PostRepository;
 import com.example.demo.repository.UserPostReactionRepository;
 import com.example.demo.service.contracts.UserValidationService;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -38,7 +39,7 @@ public class PostService {
     private final NotificationService notificationService;
 
     @Transactional
-    public PostResponseDTO createPost(CreatePostDTO dto, String authToken) {
+    public PostResponseDTO createPost(@Valid CreatePostDTO dto, String authToken) {
         long userId = jwtService.extractUserId(authToken);
         User user = userValidationService.findUserById(userId);
         Post post = Post.builder()

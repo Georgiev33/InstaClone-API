@@ -28,7 +28,6 @@ public class CommentService {
     private final PostService postService;
     private final UserValidationService userValidationService;
     private final AdminService adminService;
-    private final ModelMapper modelMapper;
     private final JwtService jwtService;
     private final NotificationRepository notificationRepository;
     private final UserCommentReactionRepository userCommentReactionRepository;
@@ -37,25 +36,24 @@ public class CommentService {
     @Transactional
     public CommentResponseDTO createComment(CreateCommentDTO createCommentDTO, String authToken) {
         long userId = jwtService.extractUserId(authToken);
-        validateCommentData(createCommentDTO);
         User author = userValidationService.findUserById(userId);
-        Post ownerPost = postService.findPostById(createCommentDTO.getPostId());
+        Post ownerPost = postService.findPostById(createCommentDTO.postId());
         adminService.hasPermission(ownerPost.getUser());
 
         Comment comment = new Comment();
         comment.setPost(ownerPost);
         comment.setUser(author);
         comment.setCreatedAt(LocalDateTime.now());
-        comment.setContent(createCommentDTO.getContent());
+        comment.setContent(createCommentDTO.content());
         ownerPost.getComments().add(comment);
-        if(createCommentDTO.getTaggedUsers() != null && !createCommentDTO.getTaggedUsers().isEmpty()){
-            addTaggedUsers(createCommentDTO.getTaggedUsers(), comment);
+        if(createCommentDTO.taggedUsers() != null && !createCommentDTO.taggedUsers().isEmpty()){
+            addTaggedUsers(createCommentDTO.taggedUsers(), comment);
         }
 
-       if(createCommentDTO.getRepliedCommentId() != null){
-           Comment parentComment = findById(createCommentDTO.getRepliedCommentId(),
+       if(createCommentDTO.repliedCommentId() != null){
+           Comment parentComment = findById(createCommentDTO.repliedCommentId(),
                    "Can't reply to a nonexistent comment!");
-           if(!parentComment.getPost().getId().equals(createCommentDTO.getPostId())){
+           if(!parentComment.getPost().getId().equals(createCommentDTO.postId())){
                throw new BadRequestException("The comment you're replying to belongs to another post!");
            }
            comment.setRepliedComment(parentComment);
@@ -63,25 +61,7 @@ public class CommentService {
        }
        commentRepository.save(comment);
        notificationService.addNotification(ownerPost.getUser(), author.getUsername() + " commented your your post.");
-        return modelMapper.map(comment, CommentResponseDTO.class);
-    }
-
-    private void addTaggedUsers(List<String> taggedUsers, Comment comment) {
-        for (String taggedUser : taggedUsers) {
-            User user = userValidationService.getUserOrThrowException(taggedUser);
-            adminService.hasPermission(user);
-            comment.getTaggedUsers().add(user);
-            Notification notification = Notification.builder()
-                    .user(user)
-                    .dateCreated(LocalDateTime.now())
-                    .notification(comment.getUser().getUsername()+ TAGGED_YOU_IN_HIS_COMMENT)
-                    .build();
-            notificationRepository.save(notification);
-        }
-    }
-
-    private Comment findById(Long commentId, String exceptionMessage) {
-        return commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException(exceptionMessage));
+        return mapCommentToResponseDTO(comment);
     }
 
     public void react(String authToken, long commentId, boolean status) {
@@ -101,14 +81,10 @@ public class CommentService {
         userCommentReactionRepository.save(userCommentReaction);
     }
 
-    private void validateCommentData(CreateCommentDTO createCommentDTO) {
-        if(createCommentDTO.getContent() == null){
-            throw new BadRequestException("Can't create a comment with no content!");
-        }
-        if(createCommentDTO.getPostId() == null){
-            throw new BadRequestException("Can't comment a nonexistent post");
-        }
+    private Comment findById(Long commentId, String exceptionMessage) {
+        return commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException(exceptionMessage));
     }
+
     private boolean deleteReactionIfStatusMatches(long userId, long commentId, boolean status) {
         Optional<UserCommentReaction> reaction =
                 userCommentReactionRepository.findById(new UserCommentReaction.UserCommentReactionKey(userId, commentId));
@@ -117,5 +93,29 @@ public class CommentService {
             return true;
         }
         return false;
+    }
+
+    private void addTaggedUsers(List<String> taggedUsers, Comment comment) {
+        for (String taggedUser : taggedUsers) {
+            User user = userValidationService.getUserOrThrowException(taggedUser);
+            adminService.hasPermission(user);
+            comment.getTaggedUsers().add(user);
+            Notification notification = Notification.builder()
+                    .user(user)
+                    .dateCreated(LocalDateTime.now())
+                    .notification(comment.getUser().getUsername()+ TAGGED_YOU_IN_HIS_COMMENT)
+                    .build();
+            notificationRepository.save(notification);
+        }
+    }
+
+    private CommentResponseDTO mapCommentToResponseDTO(Comment comment) {
+        Long repliedCommentId = comment.getRepliedComment() == null ? null : comment.getRepliedComment().getId();
+        return new CommentResponseDTO(comment.getId(),
+                comment.getUser().getId(),
+                comment.getPost().getId(),
+                repliedCommentId,
+                comment.getContent(),
+                comment.getCreatedAt());
     }
 }

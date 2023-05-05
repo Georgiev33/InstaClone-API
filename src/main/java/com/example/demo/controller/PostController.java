@@ -4,6 +4,7 @@ import com.example.demo.model.dto.post.CreatePostDTO;
 import com.example.demo.model.dto.post.PostResponseDTO;
 import com.example.demo.service.PostService;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,7 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping
-    public ResponseEntity<PostResponseDTO> createPost(@ModelAttribute CreatePostDTO dto,
+    public ResponseEntity<PostResponseDTO> createPost(@ModelAttribute @Valid CreatePostDTO dto,
                                                       @RequestHeader("Authorization") String authToken) {
         PostResponseDTO responseDTO = postService.createPost(dto, authToken);
         return ResponseEntity.ok(responseDTO);

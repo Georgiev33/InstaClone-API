@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,18 +35,13 @@ public class FileService {
     private static final Logger logger = LoggerFactory.getLogger(FileService.class);
 
     public String createContent(MultipartFile file, long userId) {
-        if (file == null) {
-            throw new InvalidMultipartFileException(CONTENT_IS_REQUIRED1);
-        }
+
         String fileName = saveFile(file, userId);
         return (HTTP_LOCALHOST + serverPort + STORY_CONTENT + fileName);
     }
 
     public void createContent(List<MultipartFile> files, long userId, Post post) {
-        if (files == null) {
-            throw new InvalidMultipartFileException(CONTENT_IS_REQUIRED1);
-        }
-
+        List<PostContent> postContents = new ArrayList<>();
         for (MultipartFile file : files) {
             String fileName = saveFile(file, userId);
             PostContent content = PostContent.builder()
@@ -53,8 +49,9 @@ public class FileService {
                     .contentUrl(HTTP_LOCALHOST + serverPort + POST_CONTENT + fileName)
                     .build();
             post.getContentUrls().add(content);
-            postContentRepository.save(content);
+          postContents.add(content);
         }
+        postContentRepository.saveAll(postContents);
     }
 
     public String saveFile(MultipartFile content, Long uId) {

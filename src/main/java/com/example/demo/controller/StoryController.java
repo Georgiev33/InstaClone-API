@@ -4,6 +4,7 @@ import com.example.demo.model.dto.StoryResponseDTO;
 import com.example.demo.model.dto.CreateStoryDTO;
 import com.example.demo.service.StoryService;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,7 @@ public class StoryController {
     private final StoryService storyService;
 
     @PostMapping
-    public ResponseEntity<StoryResponseDTO> createStory(@ModelAttribute CreateStoryDTO dto,
+    public ResponseEntity<StoryResponseDTO> createStory(@ModelAttribute @Valid CreateStoryDTO dto,
                                                         @RequestHeader("Authorization") String authToken) {
         return ResponseEntity.ok(storyService.createStory(dto, authToken));
     }
