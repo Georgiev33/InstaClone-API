@@ -3,8 +3,8 @@ package com.example.demo.service;
 import com.example.demo.model.entity.post.Post;
 import com.example.demo.model.entity.post.PostContent;
 import com.example.demo.model.exception.BadRequestException;
-import com.example.demo.model.exception.InvalidMultipartFileException;
 import com.example.demo.repository.PostContentRepository;
+import com.example.demo.service.contracts.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -26,13 +26,13 @@ import static com.example.demo.util.Constants.*;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class FileService {
+public class FileServiceImpl implements FileService {
     private final String serverPort;
     private final PostContentRepository postContentRepository;
 
     private final List<String> AVAILABLE_EXTENSIONS = Arrays.asList(IMAGE_JPEG, IMAGE_PNG, VIDEO_MP_4, VIDEO_M_4_V);
 
-    private static final Logger logger = LoggerFactory.getLogger(FileService.class);
+    private static final Logger logger = LoggerFactory.getLogger(FileServiceImpl.class);
 
     public String createContent(MultipartFile file, long userId) {
 

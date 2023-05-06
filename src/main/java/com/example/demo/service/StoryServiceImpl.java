@@ -5,7 +5,7 @@ import com.example.demo.model.dto.StoryResponseDTO;
 import com.example.demo.model.entity.*;
 import com.example.demo.model.exception.NotFoundException;
 import com.example.demo.repository.*;
-import com.example.demo.service.contracts.UserValidationService;
+import com.example.demo.service.contracts.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -20,7 +20,7 @@ import static com.example.demo.util.Constants.*;
 
 @Service
 @RequiredArgsConstructor
-public class StoryService {
+public class StoryServiceImpl implements StoryService {
 
     private final FileService fileService;
     private final UserValidationService userValidationService;
@@ -30,6 +30,7 @@ public class StoryService {
     private final JwtService jwtService;
     private final UserStoryReactionRepository userStoryReactionRepository;
 
+    @Override
     @Transactional
     public StoryResponseDTO createStory(CreateStoryDTO dto, String authToken) {
         long userId = jwtService.extractUserId(authToken);
@@ -48,6 +49,7 @@ public class StoryService {
         return mapStoryToStoryResponseDTO(saved);
     }
 
+    @Override
     public File getContent(String fileName) {
         return fileService.getFile(fileName);
     }
@@ -56,6 +58,7 @@ public class StoryService {
         return storyRepository.findById(storyId).orElseThrow(() -> new NotFoundException(STORY_NOT_FOUND));
     }
 
+    @Override
     @Transactional
     public void react(String authToken, long storyId, boolean status) {
         long userId = jwtService.extractUserId(authToken);
@@ -74,6 +77,7 @@ public class StoryService {
         notificationService.addNotification(story.getUser(), user.getUsername() + " liked your story.");
         userStoryReactionRepository.save(userStoryReaction);
     }
+    @Override
     @Scheduled(fixedRate = HOUR_IN_MILLISECONDS)
     @Transactional
     public void deleteExpiredStoriesEveryHour(){

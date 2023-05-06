@@ -4,6 +4,8 @@ import com.example.demo.model.dto.NotificationResponseDTO;
 import com.example.demo.model.entity.Notification;
 import com.example.demo.model.entity.User;
 import com.example.demo.repository.NotificationRepository;
+import com.example.demo.service.contracts.JwtService;
+import com.example.demo.service.contracts.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,11 +21,12 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
-public class NotificationService {
+public class NotificationServiceImpl implements NotificationService {
     private final JwtService jwtService;
     private final ExecutorService executorService;
     private final NotificationRepository notificationRepository;
 
+    @Override
     public void addNotification(User user, String message) {
         notificationRepository.save(Notification.builder()
                 .user(user)
@@ -32,12 +35,14 @@ public class NotificationService {
                 .build());
     }
 
+    @Override
     public void addNotification(Set<User> users, String message) {
         notificationRepository.saveAll(users.stream()
                 .map(u -> Notification.builder().user(u).notification(message).dateCreated(LocalDateTime.now()).build())
                 .toList());
     }
 
+    @Override
     public DeferredResult<List<NotificationResponseDTO>> getNotifications(String authToken) {
         DeferredResult<List<NotificationResponseDTO>> deferredResult = new DeferredResult<>();
         SecurityContext originalSecurityContext = SecurityContextHolder.getContext();

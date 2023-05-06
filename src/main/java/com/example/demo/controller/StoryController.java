@@ -2,7 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.model.dto.StoryResponseDTO;
 import com.example.demo.model.dto.CreateStoryDTO;
-import com.example.demo.service.StoryService;
+import com.example.demo.service.contracts.StoryService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

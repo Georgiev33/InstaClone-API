@@ -12,6 +12,7 @@ import com.example.demo.model.exception.UserNotFoundException;
 import com.example.demo.repository.ban.BannedHistory;
 import com.example.demo.repository.ban.BannedUsersRepository;
 import com.example.demo.service.contracts.BanUserService;
+import com.example.demo.service.contracts.JwtService;
 import com.example.demo.service.contracts.UserValidationService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

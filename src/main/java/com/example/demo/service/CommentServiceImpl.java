@@ -9,11 +9,9 @@ import com.example.demo.model.exception.NotFoundException;
 import com.example.demo.repository.CommentRepository;
 import com.example.demo.repository.NotificationRepository;
 import com.example.demo.repository.UserCommentReactionRepository;
-import com.example.demo.service.contracts.AdminService;
-import com.example.demo.service.contracts.UserValidationService;
+import com.example.demo.service.contracts.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,7 +21,7 @@ import static com.example.demo.util.Constants.TAGGED_YOU_IN_HIS_COMMENT;
 
 @Service
 @RequiredArgsConstructor
-public class CommentService {
+public class CommentServiceImpl implements CommentService{
     private final CommentRepository commentRepository;
     private final PostService postService;
     private final UserValidationService userValidationService;

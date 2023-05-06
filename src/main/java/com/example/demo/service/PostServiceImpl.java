@@ -10,7 +10,7 @@ import com.example.demo.model.exception.NotFoundException;
 import com.example.demo.repository.PostContentRepository;
 import com.example.demo.repository.PostRepository;
 import com.example.demo.repository.UserPostReactionRepository;
-import com.example.demo.service.contracts.UserValidationService;
+import com.example.demo.service.contracts.*;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ import static com.example.demo.util.Constants.*;
 
 @Service
 @RequiredArgsConstructor
-public class PostService {
+public class PostServiceImpl implements PostService {
     private final FileService fileService;
     private final UserValidationService userValidationService;
     private final PostRepository postRepository;
@@ -38,6 +38,7 @@ public class PostService {
     private final UserPostReactionRepository userPostReactionRepository;
     private final NotificationService notificationService;
 
+    @Override
     @Transactional
     public PostResponseDTO createPost(@Valid CreatePostDTO dto, String authToken) {
         long userId = jwtService.extractUserId(authToken);
@@ -56,6 +57,7 @@ public class PostService {
 
         return mapPostToPostResponseDTO(saved);
     }
+    @Override
     public Page<PostResponseDTO> getFeed(String authToken, int page, int size) {
         long userId = jwtService.extractUserId(authToken);
         System.out.println(userId);
@@ -66,6 +68,7 @@ public class PostService {
                 .map(this::mapPostToPostResponseDTO)
                 .toList());
     }
+    @Override
     public List<String> getAllPostUrls(long postId) {
         List<PostContent> postContents = contentRepository.findAllByPostId(postId)
                 .orElseThrow(() -> new BadRequestException(INVALID_POST_ID));
@@ -75,14 +78,17 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
+    @Override
     public File getContent(String fileName) {
         return fileService.getFile(fileName);
     }
 
+    @Override
     public Post findPostById(long postId) {
         return postRepository.findById(postId).orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
     }
 
+    @Override
     @Transactional
     public void react(String authToken, long postId, boolean status) {
         long userId = jwtService.extractUserId(authToken);
@@ -102,6 +108,7 @@ public class PostService {
         userPostReactionRepository.save(userPostReaction);
     }
 
+    @Override
     public Page<PostResponseDTO> getAllUserPosts(long userId, int page, int size) {
         Page<Post> posts = postRepository.findAllByUserId(userId, PageRequest.of(page, size));
         List<PostResponseDTO> pageList = posts.stream()

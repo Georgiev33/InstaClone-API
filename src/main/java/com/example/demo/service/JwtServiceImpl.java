@@ -3,6 +3,7 @@ package com.example.demo.service;
 import com.example.demo.model.entity.BlackListToken;
 import com.example.demo.model.exception.BadRequestException;
 import com.example.demo.repository.BlackListedTokenRepository;
+import com.example.demo.service.contracts.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -22,14 +23,16 @@ import static com.example.demo.util.Constants.TOKEN_MISSING_DATA;
 
 @Service
 @RequiredArgsConstructor
-public class JwtService {
+public class JwtServiceImpl implements JwtService {
     private final BlackListedTokenRepository blackListedTokenRepository;
     private static final String SECRET_KEY = "25432A462D4A614E645267556B58703273357638782F413F4428472B4B625065";
 
+    @Override
     public void invalidateToken(String token) {
         blackListedTokenRepository.save(new BlackListToken(token.substring(7)));
     }
 
+    @Override
     public String extractUsername(String jwtToken) throws ExpiredJwtException {
         return extractClaim(jwtToken, Claims::getSubject);
     }
@@ -42,6 +45,7 @@ public class JwtService {
                 .getBody();
     }
 
+    @Override
     public String generateToken(
             Map<String, Object> extraClaims,
             UserDetails userDetails
@@ -56,6 +60,7 @@ public class JwtService {
                 .compact();
     }
 
+    @Override
     public boolean isTokenValid(String token, UserDetails userDetails) {
         String username = extractUsername(token);
         return blackListedTokenRepository.getBlackListTokensByToken(token).isEmpty()
@@ -71,6 +76,7 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration);
     }
 
+    @Override
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
@@ -81,6 +87,7 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
+    @Override
     public long extractUserId(String authToken) {
         String jwtToken = authToken.substring(7);
         Claims claims = extractAllClaims(jwtToken);

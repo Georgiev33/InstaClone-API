@@ -2,7 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.model.dto.post.CreatePostDTO;
 import com.example.demo.model.dto.post.PostResponseDTO;
-import com.example.demo.service.PostService;
+import com.example.demo.service.contracts.PostService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

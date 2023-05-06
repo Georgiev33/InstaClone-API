@@ -6,6 +6,8 @@ import com.example.demo.model.entity.Notification;
 import com.example.demo.model.entity.User;
 
 import com.example.demo.repository.NotificationRepository;
+import com.example.demo.service.contracts.JwtService;
+import com.example.demo.service.contracts.MessageService;
 import com.example.demo.service.contracts.UserValidationService;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -22,7 +24,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-public class MessageService {
+public class MessageServiceImpl implements MessageService {
     private final UserValidationService userValidationService;
     private final JwtService jwtService;
     private final KafkaTemplate<String, String> kafkaTemplate;
@@ -31,6 +33,7 @@ public class MessageService {
     private final NotificationRepository notificationRepository;
 
 
+    @Override
     public void sendMessage(String message, long receiverId, String token) {
         User receiver = userValidationService.findUserById(receiverId);
         long senderId = jwtService.extractUserId(token);
@@ -57,6 +60,7 @@ public class MessageService {
         return receiverId + senderId.toString();
     }
 
+    @Override
     public List<MessageResponse> getPageOfMessages(long otherUserId, int offset, int limit, String authToken) {
         userValidationService.throwExceptionIfUserNotFound(otherUserId);
         long senderId = jwtService.extractUserId(authToken);

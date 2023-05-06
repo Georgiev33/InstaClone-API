@@ -1,7 +1,7 @@
 package com.example.demo.config;
 
 import com.example.demo.model.exception.ExceptionController;
-import com.example.demo.service.JwtService;
+import com.example.demo.service.contracts.JwtService;
 import com.sun.istack.NotNull;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;

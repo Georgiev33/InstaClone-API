@@ -13,6 +13,7 @@ import com.example.demo.repository.report.ReportHistoryRepository;
 import com.example.demo.repository.report.ReportedUserRepository;
 import com.example.demo.service.contracts.AdminService;
 import com.example.demo.service.contracts.BanUserService;
+import com.example.demo.service.contracts.JwtService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

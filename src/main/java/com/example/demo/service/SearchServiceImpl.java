@@ -7,6 +7,7 @@ import com.example.demo.model.dto.search.SearchQueryDTO;
 import com.example.demo.model.entity.UserQuery;
 import com.example.demo.repository.SearchQueryRepository;
 import com.example.demo.repository.UserRepository;
+import com.example.demo.service.contracts.JwtService;
 import com.example.demo.service.contracts.SearchService;
 import com.example.demo.service.contracts.UserValidationService;
 import jakarta.transaction.Transactional;

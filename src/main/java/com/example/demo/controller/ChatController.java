@@ -2,7 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.model.dto.MessageRequest;
 import com.example.demo.model.dto.MessageResponse;
-import com.example.demo.service.MessageService;
+import com.example.demo.service.contracts.MessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

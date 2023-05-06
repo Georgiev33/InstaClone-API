@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.model.dto.user.UserRegistrationDTO;
+import com.example.demo.service.contracts.MailService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,7 +28,7 @@ public class MailServiceTest {
     private MailService underTest;
     @BeforeEach
     void setUp() {
-        underTest = new MailService(simpleMailMessage, mailSender);
+        underTest = new MailServiceImpl(simpleMailMessage, mailSender);
     }
 
     @Test
