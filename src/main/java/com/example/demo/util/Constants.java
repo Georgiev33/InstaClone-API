@@ -34,7 +34,7 @@ public class Constants {
     public static final String AN_ERROR_OCCURRED_WHILE_SAVING_FILE = "An error occurred while saving file.";
     public static final String EMPTY = " ";
     public static final String FILE_DOESN_T_EXIST = "File doesn't exist.";
-
+    public static final String INVALID_OWNER_MESSAGE = "You don't own this resource.";
 
     public static final String USER_CAN_T_FOLLOW_ITSELF = "User can`t follow himself";
     public static final String POST_NOT_FOUND = "Post not found.";

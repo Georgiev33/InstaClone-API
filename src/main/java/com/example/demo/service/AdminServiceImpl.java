@@ -108,11 +108,17 @@ public class AdminServiceImpl implements AdminService {
                         reportedUser.getReportedId(),
                         reportedUser.getReason())).toList());
     }
-
+    @Override
     public void hasPermission(User targetUser) throws AccessDeniedException {
         if (targetUser.isPrivate() && !isLoggedUserAdmin() && isLoggedUserFollow(targetUser)) {
             throw new AccessDeniedException(ACCESS_DENIED);
         }
+    }
+    public boolean isLoggedUserAdmin() {
+        return SecurityContextHolder.getContext().getAuthentication().getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(a -> a.contains(ADMIN));
     }
 
     private ReportedUser findReportByIdElseThrowNotFound(long reportId) {
@@ -125,10 +131,5 @@ public class AdminServiceImpl implements AdminService {
                 .anyMatch(u -> u.contains(authentication.getName()));
     }
 
-    private boolean isLoggedUserAdmin() {
-        return SecurityContextHolder.getContext().getAuthentication().getAuthorities()
-                .stream()
-                .map(GrantedAuthority::getAuthority)
-                .anyMatch(a -> a.contains(ADMIN));
-    }
+
 }

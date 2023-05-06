@@ -3,6 +3,8 @@ package com.example.demo.service.contracts;
 import com.example.demo.model.dto.post.CreatePostDTO;
 import com.example.demo.model.dto.post.PostResponseDTO;
 import com.example.demo.model.entity.post.Post;
+import com.example.demo.model.exception.InvalidOwnerException;
+import com.example.demo.model.exception.PostNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -20,10 +22,12 @@ public interface PostService {
 
     File getContent(String fileName);
 
-    Post findPostById(long postId);
+    Post findPostById(long postId) throws PostNotFoundException;
 
     @Transactional
     void react(String authToken, long postId, boolean status);
 
     Page<PostResponseDTO> getAllUserPosts(long userId, int page, int size);
+
+    void deletePostById(long postId, String authToken) throws InvalidOwnerException, PostNotFoundException;
 }

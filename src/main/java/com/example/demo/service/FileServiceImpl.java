@@ -3,6 +3,8 @@ package com.example.demo.service;
 import com.example.demo.model.entity.post.Post;
 import com.example.demo.model.entity.post.PostContent;
 import com.example.demo.model.exception.BadRequestException;
+import com.example.demo.model.exception.FileSaveException;
+import com.example.demo.model.exception.InvalidFileTypeException;
 import com.example.demo.repository.PostContentRepository;
 import com.example.demo.service.contracts.FileService;
 import lombok.RequiredArgsConstructor;
@@ -54,10 +56,10 @@ public class FileServiceImpl implements FileService {
         postContentRepository.saveAll(postContents);
     }
 
-    public String saveFile(MultipartFile content, Long uId) {
+    public String saveFile(MultipartFile content, Long uId) throws InvalidFileTypeException, FileSaveException {
         String fileExtension = content.getContentType();
         if (!AVAILABLE_EXTENSIONS.contains(fileExtension)) {
-            throw new BadRequestException(INVALID_FILE_TYPE);
+            throw new InvalidFileTypeException(INVALID_FILE_TYPE);
         }
 
         String fileName = System.nanoTime() + uId + content.getOriginalFilename().replaceAll("\\s", "");
@@ -68,7 +70,7 @@ public class FileServiceImpl implements FileService {
             logger.info(FILE + fileName + WAS_SAVED_SUCCESSFULLY);
         } catch (IOException e) {
             logger.error(ERROR_WHILE_SAVING_FILE + fileName + EMPTY + e.getMessage());
-            throw new BadRequestException(AN_ERROR_OCCURRED_WHILE_SAVING_FILE);
+            throw new FileSaveException(AN_ERROR_OCCURRED_WHILE_SAVING_FILE);
         }
         return fileName;
     }

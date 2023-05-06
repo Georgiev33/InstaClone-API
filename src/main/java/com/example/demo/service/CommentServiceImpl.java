@@ -4,8 +4,7 @@ import com.example.demo.model.dto.CommentResponseDTO;
 import com.example.demo.model.dto.CreateCommentDTO;
 import com.example.demo.model.entity.*;
 import com.example.demo.model.entity.post.Post;
-import com.example.demo.model.exception.BadRequestException;
-import com.example.demo.model.exception.NotFoundException;
+import com.example.demo.model.exception.*;
 import com.example.demo.repository.CommentRepository;
 import com.example.demo.repository.NotificationRepository;
 import com.example.demo.repository.UserCommentReactionRepository;
@@ -34,9 +33,10 @@ public class CommentServiceImpl implements CommentService{
     private final UserCommentReactionRepository userCommentReactionRepository;
     private final NotificationService notificationService;
 
+
     @Override
-    public CommentResponseDTO getCommentById(long commentId) {
-        Comment comment = findById(commentId, COMMENT_NOT_FOUND);
+    public CommentResponseDTO getCommentById(long commentId) throws CommentNotFoundException{
+        Comment comment = findById(commentId);
         Long repliedCommentId = comment.getRepliedComment() == null ? null : comment.getRepliedComment().getId();
         return new CommentResponseDTO(comment.getId(),
                 comment.getUser().getId(),
@@ -68,7 +68,8 @@ public class CommentServiceImpl implements CommentService{
     }
 
     @Transactional
-    public CommentResponseDTO createComment(CreateCommentDTO createCommentDTO, String authToken) {
+    public CommentResponseDTO createComment(CreateCommentDTO createCommentDTO, String authToken)
+            throws UserNotFoundException, PostNotFoundException, AccessDeniedException, CommentNotFoundException{
         long userId = jwtService.extractUserId(authToken);
         User author = userValidationService.findUserById(userId);
         Post ownerPost = postService.findPostById(createCommentDTO.postId());
@@ -85,8 +86,7 @@ public class CommentServiceImpl implements CommentService{
         }
 
        if(createCommentDTO.repliedCommentId() != null){
-           Comment parentComment = findById(createCommentDTO.repliedCommentId(),
-                   "Can't reply to a nonexistent comment!");
+           Comment parentComment = findById(createCommentDTO.repliedCommentId());
            if(!parentComment.getPost().getId().equals(createCommentDTO.postId())){
                throw new BadRequestException("The comment you're replying to belongs to another post!");
            }
@@ -98,10 +98,10 @@ public class CommentServiceImpl implements CommentService{
         return mapCommentToResponseDTO(comment);
     }
 
-    public void react(String authToken, long commentId, boolean status) {
+    public void react(String authToken, long commentId, boolean status) throws UserNotFoundException, CommentNotFoundException{
         long userId = jwtService.extractUserId(authToken);
         User user = userValidationService.findUserById(userId);
-        Comment comment = findById(commentId,"Comment doesn't exist.");
+        Comment comment = findById(commentId);
 
         if (deleteReactionIfStatusMatches(userId, commentId, status)) {
             return;
@@ -116,21 +116,19 @@ public class CommentServiceImpl implements CommentService{
     }
 
     @Override
-    public void deleteComment(long commentId, String authToken) {
-        User user = userValidationService.findUserById(jwtService.extractUserId(authToken));
-        Comment comment = findById(commentId, COMMENT_NOT_FOUND);
-        if(user.getRoles().stream().anyMatch(role -> role.getAuthority().equals(ADMIN))){
+    public void deleteComment(long commentId, String authToken) throws InvalidOwnerException, CommentNotFoundException{
+        long userId = jwtService.extractUserId(authToken);
+        Comment comment = findById(commentId);
+        if(adminService.isLoggedUserAdmin()){
             commentRepository.delete(comment);
             return;
         }
-        if(!comment.getUser().getId().equals(user.getId())){
-            throw new BadRequestException("Cannot delete a comment that is not yours.");
-        }
+        comment.verifyOwnerIdOrThrow(userId);
         commentRepository.delete(comment);
     }
 
-    private Comment findById(Long commentId, String exceptionMessage) {
-        return commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException(exceptionMessage));
+    private Comment findById(Long commentId) throws CommentNotFoundException {
+        return commentRepository.findById(commentId).orElseThrow(() -> new CommentNotFoundException(COMMENT_NOT_FOUND));
     }
 
     private boolean deleteReactionIfStatusMatches(long userId, long commentId, boolean status) {
@@ -143,7 +141,7 @@ public class CommentServiceImpl implements CommentService{
         return false;
     }
 
-    private void addTaggedUsers(List<String> taggedUsers, Comment comment) {
+    private void addTaggedUsers(List<String> taggedUsers, Comment comment) throws UserNotFoundException {
         for (String taggedUser : taggedUsers) {
             User user = userValidationService.getUserOrThrowException(taggedUser);
             adminService.hasPermission(user);

@@ -47,4 +47,8 @@ public class PostController {
                          @RequestParam boolean status) {
         postService.react(authToken, postId, status);
     }
+    @DeleteMapping("/{postId}")
+    public void deletePostById(@PathVariable long postId, @RequestHeader("Authorization") String authToken){
+        postService.deletePostById(postId, authToken);
+    }
 }

@@ -5,8 +5,7 @@ import com.example.demo.model.dto.post.PostResponseDTO;
 import com.example.demo.model.entity.*;
 import com.example.demo.model.entity.post.Post;
 import com.example.demo.model.entity.post.PostContent;
-import com.example.demo.model.exception.BadRequestException;
-import com.example.demo.model.exception.NotFoundException;
+import com.example.demo.model.exception.*;
 import com.example.demo.repository.PostContentRepository;
 import com.example.demo.repository.PostRepository;
 import com.example.demo.repository.UserPostReactionRepository;
@@ -37,10 +36,11 @@ public class PostServiceImpl implements PostService {
     private final JwtService jwtService;
     private final UserPostReactionRepository userPostReactionRepository;
     private final NotificationService notificationService;
+    private final AdminService adminService;
 
     @Override
     @Transactional
-    public PostResponseDTO createPost(@Valid CreatePostDTO dto, String authToken) {
+    public PostResponseDTO createPost(@Valid CreatePostDTO dto, String authToken) throws UserNotFoundException {
         long userId = jwtService.extractUserId(authToken);
         User user = userValidationService.findUserById(userId);
         Post post = Post.builder()
@@ -84,8 +84,8 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Post findPostById(long postId) {
-        return postRepository.findById(postId).orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
+    public Post findPostById(long postId) throws PostNotFoundException {
+        return postRepository.findById(postId).orElseThrow(() -> new PostNotFoundException(POST_NOT_FOUND));
     }
 
     @Override
@@ -115,6 +115,18 @@ public class PostServiceImpl implements PostService {
                 .map(this::mapPostToPostResponseDTO)
                 .toList();
         return new PageImpl<>(pageList);
+    }
+
+    @Override
+    public void deletePostById(long postId, String authToken) throws InvalidOwnerException, PostNotFoundException {
+        Post post = findPostById(postId);
+        long userId = jwtService.extractUserId(authToken);
+        if(adminService.isLoggedUserAdmin()){
+            postRepository.delete(post);
+            return;
+        }
+        post.verifyOwnerIdOrThrow(userId);
+        postRepository.delete(post);
     }
 
     private boolean deleteReactionIfStatusMatches(long userId, long postId, boolean status) {

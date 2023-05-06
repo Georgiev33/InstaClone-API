@@ -1,7 +1,9 @@
 package com.example.demo.model.entity;
 
+import com.example.demo.model.Ownable;
 import com.example.demo.model.Postable;
 import com.example.demo.model.entity.post.Post;
+import com.example.demo.model.exception.InvalidOwnerException;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,10 +12,13 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import static com.example.demo.util.Constants.INVALID_OWNER_MESSAGE;
+
 @Entity(name = "comments")
 @Getter
 @Setter
-public class Comment implements Postable {
+public class Comment implements Postable, Ownable{
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -44,4 +49,11 @@ public class Comment implements Postable {
     private Set<Hashtag> hashtags = new HashSet<>();
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Override
+    public void verifyOwnerIdOrThrow(long userId) throws InvalidOwnerException {
+        if(!this.getUser().getId().equals(userId)) {
+            throw new InvalidOwnerException(INVALID_OWNER_MESSAGE);
+        }
+    }
 }

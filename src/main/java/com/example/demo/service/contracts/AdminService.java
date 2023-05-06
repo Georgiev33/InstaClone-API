@@ -16,4 +16,5 @@ public interface AdminService {
     void handleReport(String authToken, HandleReportDTO handleReportDTO) throws ReportNotFoundException;
 
     Page<ReportedUsersResponseDTO> getActiveReports(long reportedId, int page, int size);
+    boolean isLoggedUserAdmin();
 }
