@@ -12,12 +12,15 @@ import com.example.demo.repository.UserCommentReactionRepository;
 import com.example.demo.service.contracts.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static com.example.demo.util.Constants.TAGGED_YOU_IN_HIS_COMMENT;
+import static com.example.demo.util.Constants.*;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +33,39 @@ public class CommentServiceImpl implements CommentService{
     private final NotificationRepository notificationRepository;
     private final UserCommentReactionRepository userCommentReactionRepository;
     private final NotificationService notificationService;
+
+    @Override
+    public CommentResponseDTO getCommentById(long commentId) {
+        Comment comment = findById(commentId, COMMENT_NOT_FOUND);
+        Long repliedCommentId = comment.getRepliedComment() == null ? null : comment.getRepliedComment().getId();
+        return new CommentResponseDTO(comment.getId(),
+                comment.getUser().getId(),
+                comment.getPost().getId(),
+                repliedCommentId,
+                comment.getContent(),
+                comment.getCreatedAt());
+    }
+
+    public Page<CommentResponseDTO> getPageOfCommentsForPost(long postId, int page, int size) {
+        Page<Comment> postComments = commentRepository.findAllByPostIdAndRepliedCommentIsNull(postId, PageRequest.of(page, size));
+        return new PageImpl<>(postComments.stream().map(comment -> new CommentResponseDTO(comment.getId(),
+                comment.getUser().getId(),
+                comment.getPost().getId(),
+                null,
+                comment.getContent(),
+                comment.getCreatedAt())).toList());
+    }
+
+    @Override
+    public Page<CommentResponseDTO> getPageOfCommentReplies(long commentId, int page, int size) {
+        Page<Comment> commentReplies = commentRepository.findAllByRepliedCommentId(commentId, PageRequest.of(page, size));
+        return new PageImpl<>(commentReplies.stream().map(comment -> new CommentResponseDTO(comment.getId(),
+                comment.getUser().getId(),
+                comment.getPost().getId(),
+                comment.getRepliedComment().getId(),
+                comment.getContent(),
+                comment.getCreatedAt())).toList());
+    }
 
     @Transactional
     public CommentResponseDTO createComment(CreateCommentDTO createCommentDTO, String authToken) {
@@ -77,6 +113,20 @@ public class CommentServiceImpl implements CommentService{
                 .status(status)
                 .build();
         userCommentReactionRepository.save(userCommentReaction);
+    }
+
+    @Override
+    public void deleteComment(long commentId, String authToken) {
+        User user = userValidationService.findUserById(jwtService.extractUserId(authToken));
+        Comment comment = findById(commentId, COMMENT_NOT_FOUND);
+        if(user.getRoles().stream().anyMatch(role -> role.getAuthority().equals(ADMIN))){
+            commentRepository.delete(comment);
+            return;
+        }
+        if(!comment.getUser().getId().equals(user.getId())){
+            throw new BadRequestException("Cannot delete a comment that is not yours.");
+        }
+        commentRepository.delete(comment);
     }
 
     private Comment findById(Long commentId, String exceptionMessage) {

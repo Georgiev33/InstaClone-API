@@ -15,6 +15,7 @@ public class Constants {
     public static final String MEDIA_URI = "/post/media/";
     public static final String HTTP_LOCALHOST = "http://localhost:";
     public static final String USER_NOT_FOUND = "User not found";
+    public static final String COMMENT_NOT_FOUND = "Comment not found.";
     public static final String POST_CONTENT = "/post/content/";
     public static final String STORY_CONTENT = "/post/content/";
     public static final String POST_CONTENT_IS_REQUIRED1 = "Post content is required.";

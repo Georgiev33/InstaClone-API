@@ -22,7 +22,7 @@ public class Comment implements Postable {
     private User user;
     @Column(name = "content")
     private String content;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Post post;
     @ManyToOne
     private Comment repliedComment;
