@@ -19,7 +19,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.function.Function;
 
-import static com.example.demo.util.Constants.TOKEN_MISSING_DATA;
+import static com.example.demo.util.constants.MessageConstants.TOKEN_MISSING_DATA;
 
 @Service
 @RequiredArgsConstructor

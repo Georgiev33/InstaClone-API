@@ -11,6 +11,7 @@ import com.example.demo.model.exception.*;
 import com.example.demo.repository.report.ReportedUserRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.contracts.*;
+import com.example.demo.util.constants.MessageConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,7 +22,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-import static com.example.demo.util.Constants.*;
+import static com.example.demo.util.constants.Constants.*;
+import static com.example.demo.util.constants.MessageConstants.USER_CAN_T_FOLLOW_ITSELF;
 
 @Service
 @RequiredArgsConstructor

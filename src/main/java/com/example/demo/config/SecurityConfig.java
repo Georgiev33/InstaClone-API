@@ -11,10 +11,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import static com.example.demo.util.Constants.ADMIN;
+import static com.example.demo.util.constants.Constants.ADMIN;
 
 @EnableWebSecurity
 @Configuration

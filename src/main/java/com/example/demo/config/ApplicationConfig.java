@@ -13,7 +13,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import static com.example.demo.util.Constants.USER_NOT_FOUND;
+import static com.example.demo.util.constants.MessageConstants.USER_NOT_FOUND;
 
 @Configuration
 @RequiredArgsConstructor

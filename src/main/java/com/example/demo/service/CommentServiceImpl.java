@@ -9,6 +9,7 @@ import com.example.demo.repository.CommentRepository;
 import com.example.demo.repository.NotificationRepository;
 import com.example.demo.repository.UserCommentReactionRepository;
 import com.example.demo.service.contracts.*;
+import com.example.demo.util.constants.MessageConstants;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,7 +20,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static com.example.demo.util.Constants.*;
+import static com.example.demo.util.constants.MessageConstants.COMMENT_NOT_FOUND;
+import static com.example.demo.util.constants.MessageConstants.TAGGED_YOU_IN_HIS_COMMENT;
 
 @Service
 @RequiredArgsConstructor

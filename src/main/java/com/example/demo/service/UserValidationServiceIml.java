@@ -6,6 +6,7 @@ import com.example.demo.model.exception.*;
 import com.example.demo.repository.ban.BannedUsersRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.contracts.UserValidationService;
+import com.example.demo.util.constants.MessageConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -13,8 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-import static com.example.demo.util.Constants.*;
-import static com.example.demo.util.Constants.EMAIL_ALREADY_EXISTS;
+import static com.example.demo.util.constants.MessageConstants.*;
 
 @Service
 @RequiredArgsConstructor

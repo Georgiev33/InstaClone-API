@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.example.demo.util.Constants.INVALID_OWNER_MESSAGE;
+import static com.example.demo.util.constants.MessageConstants.INVALID_OWNER_MESSAGE;
 
 @Entity(name = "comments")
 @Getter

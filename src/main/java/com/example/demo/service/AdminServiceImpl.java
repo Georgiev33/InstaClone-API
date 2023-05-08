@@ -26,8 +26,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static com.example.demo.util.Constants.ACCESS_DENIED;
-import static com.example.demo.util.Constants.ADMIN;
+import static com.example.demo.util.constants.MessageConstants.ACCESS_DENIED;
+import static com.example.demo.util.constants.Constants.ADMIN;
 
 @Service
 @RequiredArgsConstructor

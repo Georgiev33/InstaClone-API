@@ -6,6 +6,7 @@ import com.example.demo.model.entity.*;
 import com.example.demo.model.exception.NotFoundException;
 import com.example.demo.repository.*;
 import com.example.demo.service.contracts.*;
+import com.example.demo.util.constants.MessageConstants;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,7 +17,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.example.demo.util.Constants.*;
+import static com.example.demo.util.constants.Constants.*;
+import static com.example.demo.util.constants.MessageConstants.STORY_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -109,7 +111,7 @@ public class StoryServiceImpl implements StoryService {
                 .stream()
                 .map(userValidationService::getUserOrThrowException)
                 .collect(Collectors.toSet());
-        notificationService.addNotification(userList, creator.getUsername() + TAGGED_YOU_IN_HIS_STORY);
+        notificationService.addNotification(userList, creator.getUsername() + MessageConstants.TAGGED_YOU_IN_HIS_STORY);
         return userList;
     }
 }

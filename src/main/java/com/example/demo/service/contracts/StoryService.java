@@ -7,7 +7,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import java.io.File;
 
-import static com.example.demo.util.Constants.HOUR_IN_MILLISECONDS;
+import static com.example.demo.util.constants.Constants.HOUR_IN_MILLISECONDS;
 
 public interface StoryService {
     @Transactional

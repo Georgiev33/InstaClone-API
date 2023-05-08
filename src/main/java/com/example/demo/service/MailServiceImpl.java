@@ -8,7 +8,7 @@ import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
 
-import static com.example.demo.util.Constants.*;
+import static com.example.demo.util.constants.Constants.*;
 
 @Service
 @RequiredArgsConstructor

@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static com.example.demo.util.Constants.HOUR_IN_MILLISECONDS;
+import static com.example.demo.util.constants.Constants.HOUR_IN_MILLISECONDS;
 
 @Service
 @RequiredArgsConstructor

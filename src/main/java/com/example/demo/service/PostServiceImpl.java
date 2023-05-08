@@ -10,8 +10,8 @@ import com.example.demo.repository.PostContentRepository;
 import com.example.demo.repository.PostRepository;
 import com.example.demo.repository.UserPostReactionRepository;
 import com.example.demo.service.contracts.*;
+import com.example.demo.util.constants.MessageConstants;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -23,7 +23,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.example.demo.util.Constants.*;
+import static com.example.demo.util.constants.MessageConstants.*;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +40,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public PostResponseDTO createPost(@Valid CreatePostDTO dto, String authToken) throws UserNotFoundException {
+    public PostResponseDTO createPost(CreatePostDTO dto, String authToken) throws UserNotFoundException {
         long userId = jwtService.extractUserId(authToken);
         User user = userValidationService.findUserById(userId);
         Post post = Post.builder()
@@ -60,7 +60,6 @@ public class PostServiceImpl implements PostService {
     @Override
     public Page<PostResponseDTO> getFeed(String authToken, int page, int size) {
         long userId = jwtService.extractUserId(authToken);
-        System.out.println(userId);
         int offset = page * size;
         int limit = size;
         List<Post> posts = postRepository.findPostsByUserIdWithPostTotalCount(userId, offset,limit);
@@ -69,9 +68,9 @@ public class PostServiceImpl implements PostService {
                 .toList());
     }
     @Override
-    public List<String> getAllPostUrls(long postId) {
+    public List<String> getAllPostUrls(long postId) throws PostNotFoundException {
         List<PostContent> postContents = contentRepository.findAllByPostId(postId)
-                .orElseThrow(() -> new BadRequestException(INVALID_POST_ID));
+                .orElseThrow(() -> new PostNotFoundException(POST_NOT_FOUND));
 
         return postContents.stream()
                 .map(PostContent::getContentUrl)
@@ -79,7 +78,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public File getContent(String fileName) {
+    public File getContent(String fileName) throws FileNotFoundException{
         return fileService.getFile(fileName);
     }
 
@@ -104,12 +103,13 @@ public class PostServiceImpl implements PostService {
                 .post(post)
                 .status(status)
                 .build();
-        notificationService.addNotification(post.getUser(), user.getUsername() + " liked your post.");
+        notificationService.addNotification(post.getUser(), user.getUsername() + POST_REACTION_MESSAGE);
         userPostReactionRepository.save(userPostReaction);
     }
 
     @Override
-    public Page<PostResponseDTO> getAllUserPosts(long userId, int page, int size) {
+    public Page<PostResponseDTO> getAllUserPosts(long userId, int page, int size) throws UserNotFoundException{
+        userValidationService.throwExceptionIfUserNotFound(userId);
         Page<Post> posts = postRepository.findAllByUserId(userId, PageRequest.of(page, size));
         List<PostResponseDTO> pageList = posts.stream()
                 .map(this::mapPostToPostResponseDTO)
