@@ -64,9 +64,9 @@ public class AdminServiceImpl implements AdminService {
     @Transactional
     public void handleReport(String authToken, HandleReportDTO handleReportDTO) throws ReportNotFoundException {
         ReportedUser report = findReportByIdElseThrowNotFound(handleReportDTO.reportId());
-        List<ReportedUser> userReports = reportedUsersRepository.findAllByReportedId(report.getReportedId());
         String reason = handleReportDTO.reason() == null ? report.getReason() : handleReportDTO.reason();
         if (handleReportDTO.status()) {
+            List<ReportedUser> userReports = reportedUsersRepository.findAllByReportedId(report.getReportedId());
             banUserService.banUser(new BanUserDTO(report.getReportedId(), reason, handleReportDTO.hoursToBan()), authToken);
             reportHistoryRepository.saveAll(userReports
                     .stream()
@@ -79,18 +79,18 @@ public class AdminServiceImpl implements AdminService {
                             .build())
                     .toList());
             reportedUsersRepository.deleteAll(userReports);
-            return;
+        }else {
+            reportedUsersRepository.delete(report);
+            reportHistoryRepository.save(
+                    ReportHistory
+                            .builder()
+                            .reportedId(report.getReportedId())
+                            .reporterId(report.getReporterId())
+                            .adminId(jwtService.extractUserId(authToken))
+                            .reason(report.getReason())
+                            .status(false)
+                            .build());
         }
-        reportedUsersRepository.delete(report);
-        reportHistoryRepository.save(
-                ReportHistory
-                        .builder()
-                        .reportedId(report.getReportedId())
-                        .reporterId(report.getReporterId())
-                        .adminId(jwtService.extractUserId(authToken))
-                        .reason(report.getReason())
-                        .status(false)
-                        .build());
     }
 
     @Override
