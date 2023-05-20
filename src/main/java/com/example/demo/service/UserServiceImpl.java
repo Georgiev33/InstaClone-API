@@ -166,6 +166,18 @@ public class UserServiceImpl implements UserService {
         return "Your account was deleted successfully.";
     }
 
+    @Override
+    public void unfollowUser(long userId, String authToken) throws UserNotFoundException, BadRequestException {
+        User userToUnfollow = userValidationService.findUserById(userId);
+        User loggedUser = userValidationService.findUserById(jwtService.extractUserId(authToken));
+        if(userToUnfollow.getFollowers().contains(loggedUser)){
+            userToUnfollow.getFollowers().remove(loggedUser);
+            userRepository.save(userToUnfollow);
+        }else{
+            throw new BadRequestException("You are not following the user you're trying to unfollow.");
+        }
+    }
+
     private boolean isReportExist(long reporterId, long reportedId) {
         return reportedUsersRepository.findByReporterIdAndReportedId(reporterId, reportedId).isPresent();
     }

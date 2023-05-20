@@ -88,4 +88,8 @@ public class UserController {
     public String deleteAccount(@RequestHeader("Authorization") String authToken){
         return userService.deleteAccount(authToken);
     }
+    @DeleteMapping("/following/{userId}")
+    public void unfollowUser(@PathVariable long userId, @RequestHeader("Authorization") String authToken){
+        userService.unfollowUser(userId, authToken);
+    }
 }

@@ -30,4 +30,6 @@ public interface UserService extends UserDetailsService {
     UserWithoutPasswordDTO getUserById(long userId) throws UserNotFoundException;
 
     String deleteAccount(String authToken);
+
+    void unfollowUser(long userId, String authToken) throws UserNotFoundException, BadRequestException;
 }
