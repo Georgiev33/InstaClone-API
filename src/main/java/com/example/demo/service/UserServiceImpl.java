@@ -1,13 +1,11 @@
 package com.example.demo.service;
 
 import com.example.demo.model.dto.ReportedUsers.ReportUserDTO;
-import com.example.demo.model.dto.user.UserLoginDTO;
-import com.example.demo.model.dto.user.UserRegistrationDTO;
-import com.example.demo.model.dto.user.UserUpdateDTO;
-import com.example.demo.model.dto.user.UserWithUsernameAndIdDTO;
+import com.example.demo.model.dto.user.*;
 import com.example.demo.model.entity.report.ReportedUser;
 import com.example.demo.model.entity.User;
 import com.example.demo.model.exception.*;
+import com.example.demo.repository.PostRepository;
 import com.example.demo.repository.report.ReportedUserRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.contracts.*;
@@ -29,6 +27,7 @@ import static com.example.demo.util.constants.MessageConstants.USER_CAN_T_FOLLOW
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final PostRepository postRepository;
     private final BCryptPasswordEncoder encoder;
     private final UserValidationService userValidationService;
     private final AuthenticationManager authenticationManager;
@@ -146,6 +145,27 @@ public class UserServiceImpl implements UserService {
                 .reason(reportUserDTO.reason())
                 .build());
     }
+
+    @Override
+    public UserWithoutPasswordDTO getUserById(long userId) throws UserNotFoundException {
+        User user =  userValidationService.findUserById(userId);
+
+        return new UserWithoutPasswordDTO(
+                user.getId(),
+                user.getUsername(),
+                user.getBio(),
+                postRepository.countAllByUserId(userId),
+                userRepository.countFollowers(user),
+                userRepository.countFollowing(user));
+    }
+
+    @Override
+    public String deleteAccount(String authToken) throws UserNotFoundException{
+        User user = userValidationService.findUserById(jwtService.extractUserId(authToken));
+        userRepository.delete(user);
+        return "Your account was deleted successfully.";
+    }
+
     private boolean isReportExist(long reporterId, long reportedId) {
         return reportedUsersRepository.findByReporterIdAndReportedId(reporterId, reportedId).isPresent();
     }

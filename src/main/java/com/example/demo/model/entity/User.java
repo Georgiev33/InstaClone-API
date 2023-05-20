@@ -8,7 +8,8 @@ import org.springframework.security.core.GrantedAuthority;
 
 import java.util.*;
 
-@Entity(name = "users")
+@Entity
+@Table(name = "users")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,7 +31,7 @@ public class User implements UserDetails {
     private Set<Comment> comments;
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(
-            name = "following",
+            name = "followers",
             joinColumns = {@JoinColumn(name = "following_id")},
             inverseJoinColumns = {@JoinColumn(name = "user_id")}
     )

@@ -1,10 +1,7 @@
 package com.example.demo.service.contracts;
 
 import com.example.demo.model.dto.ReportedUsers.ReportUserDTO;
-import com.example.demo.model.dto.user.UserLoginDTO;
-import com.example.demo.model.dto.user.UserRegistrationDTO;
-import com.example.demo.model.dto.user.UserUpdateDTO;
-import com.example.demo.model.dto.user.UserWithUsernameAndIdDTO;
+import com.example.demo.model.dto.user.*;
 import com.example.demo.model.exception.*;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
@@ -29,4 +26,8 @@ public interface UserService extends UserDetailsService {
 
     void reportUser(ReportUserDTO reportUserDTO, String authToken)
             throws ReportedUserAlreadyExist, UserNotFoundException;
+
+    UserWithoutPasswordDTO getUserById(long userId) throws UserNotFoundException;
+
+    String deleteAccount(String authToken);
 }

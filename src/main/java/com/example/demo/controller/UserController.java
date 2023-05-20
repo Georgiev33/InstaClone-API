@@ -2,10 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.model.dto.ReportedUsers.ReportUserDTO;
 import com.example.demo.model.dto.post.PostResponseDTO;
-import com.example.demo.model.dto.user.UserLoginDTO;
-import com.example.demo.model.dto.user.UserRegistrationDTO;
-import com.example.demo.model.dto.user.UserUpdateDTO;
-import com.example.demo.model.dto.user.UserWithUsernameAndIdDTO;
+import com.example.demo.model.dto.user.*;
 import com.example.demo.service.contracts.PostService;
 import com.example.demo.service.contracts.UserService;
 import com.example.demo.service.contracts.UserValidationService;
@@ -24,11 +21,6 @@ public class UserController {
     private final UserService userService;
     private final PostService postService;
     private final UserValidationService userValidationService;
-
-    @GetMapping("/auth/{verificationCode}")
-    public ResponseEntity<String> verifyUser(@PathVariable String verificationCode) {
-        return userValidationService.verifyUser(verificationCode);
-    }
 
     @PostMapping("/report")
     public void reportUser(@RequestBody @Valid ReportUserDTO reportUserDTO, @RequestHeader("Authorization") String authToken) {
@@ -59,7 +51,15 @@ public class UserController {
     public void followUser(@PathVariable long followedUserId, @RequestHeader("Authorization") String authToken) {
         userService.followUser(followedUserId, authToken);
     }
+    @GetMapping("/auth/{verificationCode}")
+    public ResponseEntity<String> verifyUser(@PathVariable String verificationCode) {
+        return userValidationService.verifyUser(verificationCode);
+    }
 
+    @GetMapping("/{userId}")
+    public UserWithoutPasswordDTO getUserById(@PathVariable long userId, @RequestHeader("Authorization") String authToken){
+        return userService.getUserById(userId);
+    }
     @GetMapping("/followers")
     public List<UserWithUsernameAndIdDTO> getFollowers(@RequestHeader("Authorization") String authToken) {
         return userService.getFollowers(authToken);
@@ -82,5 +82,10 @@ public class UserController {
                                          @RequestParam(required = false, defaultValue = "0") int page,
                                          @RequestParam(required = false, defaultValue = "10") int size) {
         return postService.getFeed(authToken, page, size);
+    }
+
+    @DeleteMapping()
+    public String deleteAccount(@RequestHeader("Authorization") String authToken){
+        return userService.deleteAccount(authToken);
     }
 }
