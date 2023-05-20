@@ -1,12 +1,14 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.dto.StoryResponseDTO;
-import com.example.demo.model.dto.CreateStoryDTO;
+import com.example.demo.model.dto.ReactionResponseDTO;
+import com.example.demo.model.dto.story.StoryResponseDTO;
+import com.example.demo.model.dto.story.CreateStoryDTO;
 import com.example.demo.service.contracts.StoryService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,7 +33,13 @@ public class StoryController {
         response.setContentType(Files.probeContentType(file.toPath()));
         Files.copy(file.toPath(), response.getOutputStream());
     }
-
+    @GetMapping("/{storyId}/reactions")
+    public Page<ReactionResponseDTO> getPageOfStoryReactions(
+            @PathVariable long storyId,
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size){
+        return storyService.getPageOfStoryReactions(storyId, page, size);
+    }
     @PostMapping("/{storyId}/reactions")
     public void react(@PathVariable long storyId,
                           @RequestHeader("Authorization") String authToken,

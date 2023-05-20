@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.model.dto.CommentResponseDTO;
 import com.example.demo.model.dto.CreateCommentDTO;
+import com.example.demo.model.dto.ReactionResponseDTO;
 import com.example.demo.service.CommentServiceImpl;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,13 @@ public class CommentController {
                                             @RequestHeader("Authorization") String authToken){
         return commentService.createComment(commentDTO, authToken);
     }
+    @GetMapping("/{commentId}/reactions")
+    public Page<ReactionResponseDTO> getPageOfCommentReactions(@PathVariable long commentId,
+                                                               @RequestParam(required = false, defaultValue = "0") int page,
+                                                               @RequestParam(required = false, defaultValue = "10") int size){
+        return commentService.getPageOfCommentReactions(commentId, page, size);
+    }
+
     @PostMapping("/{commentId}/reactions")
     public void react(@PathVariable long commentId,
                       @RequestHeader("Authorization") String authToken,

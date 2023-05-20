@@ -1,14 +1,19 @@
 package com.example.demo.service;
 
-import com.example.demo.model.dto.CreateStoryDTO;
-import com.example.demo.model.dto.StoryResponseDTO;
+import com.example.demo.model.dto.ReactionResponseDTO;
+import com.example.demo.model.dto.story.CreateStoryDTO;
+import com.example.demo.model.dto.story.StoryResponseDTO;
 import com.example.demo.model.entity.*;
 import com.example.demo.model.exception.NotFoundException;
+import com.example.demo.model.exception.StoryNotFoundException;
 import com.example.demo.repository.*;
 import com.example.demo.service.contracts.*;
 import com.example.demo.util.constants.MessageConstants;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -56,8 +61,8 @@ public class StoryServiceImpl implements StoryService {
         return fileService.getFile(fileName);
     }
 
-    private Story findStoryById(long storyId) {
-        return storyRepository.findById(storyId).orElseThrow(() -> new NotFoundException(STORY_NOT_FOUND));
+    private Story findStoryById(long storyId) throws StoryNotFoundException{
+        return storyRepository.findById(storyId).orElseThrow(() -> new StoryNotFoundException(STORY_NOT_FOUND));
     }
 
     @Override
@@ -86,13 +91,30 @@ public class StoryServiceImpl implements StoryService {
         storyRepository.deleteAllByExpirationDateBefore(LocalDateTime.now());
     }
 
-    private StoryResponseDTO mapStoryToStoryResponseDTO(Story saved) {
-        return new StoryResponseDTO(saved.getId(),
-                saved.getContentUrl(),
-                saved.getDateCreated(),
-                saved.getExpirationDate(),
-                saved.getHashtags().stream().map(Hashtag::getTagName).toList(),
-                saved.getUserTags().stream().map(User::getUsername).toList());
+    @Override
+    public Page<ReactionResponseDTO> getPageOfStoryReactions(long storyId, int page, int size) throws StoryNotFoundException{
+        findStoryById(storyId);
+        Page<UserStoryReaction> userStoryReactions = userStoryReactionRepository.findAllByStoryId(storyId, PageRequest.of(page, size));
+        return new PageImpl<>(
+                userStoryReactions
+                .stream()
+                .map(this::mapReactionToReactionResponseDTO).toList());
+    }
+    private ReactionResponseDTO mapReactionToReactionResponseDTO(UserStoryReaction userStoryReaction) {
+        return new ReactionResponseDTO(
+                userStoryReaction.getUser().getId(),
+                userStoryReaction.getUser().getUsername(),
+                userStoryReaction.isStatus());
+    }
+    private StoryResponseDTO mapStoryToStoryResponseDTO(Story story) {
+        return new StoryResponseDTO(story.getId(),
+                story.getContentUrl(),
+                story.getDateCreated(),
+                story.getExpirationDate(),
+                story.getHashtags().stream().map(Hashtag::getTagName).toList(),
+                story.getUserTags().stream().map(User::getUsername).toList(),
+                userStoryReactionRepository.countAllByStoryIdAndStatusTrue(story.getId()),
+                userStoryReactionRepository.countAllByStoryIdAndStatusFalse(story.getId()));
     }
 
     private boolean deleteReactionIfStatusMatches(long userId, long storyId, boolean status) {

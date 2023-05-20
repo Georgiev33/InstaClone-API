@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.model.dto.post.CreatePostDTO;
+import com.example.demo.model.dto.ReactionResponseDTO;
 import com.example.demo.model.dto.post.PostResponseDTO;
 import com.example.demo.model.entity.*;
 import com.example.demo.model.entity.post.Post;
@@ -10,7 +11,6 @@ import com.example.demo.repository.PostContentRepository;
 import com.example.demo.repository.PostRepository;
 import com.example.demo.repository.UserPostReactionRepository;
 import com.example.demo.service.contracts.*;
-import com.example.demo.util.constants.MessageConstants;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -129,6 +129,29 @@ public class PostServiceImpl implements PostService {
         postRepository.delete(post);
     }
 
+    @Override
+    public PostResponseDTO getPostById(long postId) throws PostNotFoundException{
+        Post post = findPostById(postId);
+        return mapPostToPostResponseDTO(post);
+    }
+
+    @Override
+    public Page<ReactionResponseDTO> getPageOfPostReactions(long postId, int page, int size) throws PostNotFoundException {
+        findPostById(postId);
+        Page<UserPostReaction> reactions = userPostReactionRepository.findAllByPostId(postId, PageRequest.of(page, size));
+        return new PageImpl<>(reactions
+                .stream()
+                .map(this::mapReactionToReactionResponseDTO
+                ).toList());
+    }
+
+    private ReactionResponseDTO mapReactionToReactionResponseDTO(UserPostReaction userPostReaction) {
+        return new ReactionResponseDTO(
+                userPostReaction.getUser().getId(),
+                userPostReaction.getUser().getUsername(),
+                userPostReaction.isStatus());
+    }
+
     private boolean deleteReactionIfStatusMatches(long userId, long postId, boolean status) {
         Optional<UserPostReaction> reaction =
                 userPostReactionRepository.findById(new UserPostReaction.UserPostReactionKey(userId, postId));
@@ -139,13 +162,16 @@ public class PostServiceImpl implements PostService {
         return false;
     }
 
-    private PostResponseDTO mapPostToPostResponseDTO(Post saved) {
-        return new PostResponseDTO(saved.getId(),
-                saved.getContentUrls().stream().map(PostContent::getContentUrl).toList(),
-                saved.getCaption(),
-                saved.getDateCreated(),
-                saved.getHashtags().stream().map(Hashtag::getTagName).toList(),
-                saved.getUserTags().stream().map(User::getUsername).toList());
+    private PostResponseDTO mapPostToPostResponseDTO(Post post) {
+        return new PostResponseDTO(post.getId(),
+                post.getContentUrls().stream().map(PostContent::getContentUrl).toList(),
+                post.getCaption(),
+                post.getDateCreated(),
+                post.getHashtags().stream().map(Hashtag::getTagName).toList(),
+                post.getUserTags().stream().map(User::getUsername).toList(),
+                userPostReactionRepository.countAllByPostIdAndStatusTrue(post.getId()),
+                userPostReactionRepository.countAllByPostIdAndStatusFalse(post.getId())
+                );
     }
 
     private Set<User> addTaggedUsers(Optional<List<String>> users, User creator) {

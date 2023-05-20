@@ -10,6 +10,8 @@ public record PostResponseDTO(long id,
                               String caption,
                               LocalDateTime dateCreated,
                               List<String> hashtags,
-                              List<String> userTags) {
+                              List<String> userTags,
+                              long likes,
+                              long dislikes) {
 
 }

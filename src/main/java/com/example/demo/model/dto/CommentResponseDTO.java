@@ -8,5 +8,7 @@ public record CommentResponseDTO(long id,
                                  long postId,
                                  Long repliedCommentId,
                                  String content,
-                                 LocalDateTime createdAt) {
+                                 LocalDateTime createdAt,
+                                 long likes,
+                                 long dislikes) {
 }

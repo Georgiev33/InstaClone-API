@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.model.dto.CommentResponseDTO;
 import com.example.demo.model.dto.CreateCommentDTO;
+import com.example.demo.model.dto.ReactionResponseDTO;
 import com.example.demo.model.entity.*;
 import com.example.demo.model.entity.post.Post;
 import com.example.demo.model.exception.*;
@@ -40,33 +41,28 @@ public class CommentServiceImpl implements CommentService{
     public CommentResponseDTO getCommentById(long commentId) throws CommentNotFoundException{
         Comment comment = findById(commentId);
         Long repliedCommentId = comment.getRepliedComment() == null ? null : comment.getRepliedComment().getId();
-        return new CommentResponseDTO(comment.getId(),
-                comment.getUser().getId(),
-                comment.getPost().getId(),
-                repliedCommentId,
-                comment.getContent(),
-                comment.getCreatedAt());
+        return mapCommentToResponseDTO(comment);
     }
 
     public Page<CommentResponseDTO> getPageOfCommentsForPost(long postId, int page, int size) {
         Page<Comment> postComments = commentRepository.findAllByPostIdAndRepliedCommentIsNull(postId, PageRequest.of(page, size));
-        return new PageImpl<>(postComments.stream().map(comment -> new CommentResponseDTO(comment.getId(),
-                comment.getUser().getId(),
-                comment.getPost().getId(),
-                null,
-                comment.getContent(),
-                comment.getCreatedAt())).toList());
+        return new PageImpl<>(postComments.stream().map(this::mapCommentToResponseDTO).toList());
     }
 
     @Override
     public Page<CommentResponseDTO> getPageOfCommentReplies(long commentId, int page, int size) {
         Page<Comment> commentReplies = commentRepository.findAllByRepliedCommentId(commentId, PageRequest.of(page, size));
-        return new PageImpl<>(commentReplies.stream().map(comment -> new CommentResponseDTO(comment.getId(),
-                comment.getUser().getId(),
-                comment.getPost().getId(),
-                comment.getRepliedComment().getId(),
-                comment.getContent(),
-                comment.getCreatedAt())).toList());
+        return new PageImpl<>(commentReplies.stream().map(this::mapCommentToResponseDTO).toList());
+    }
+
+    @Override
+    public Page<ReactionResponseDTO> getPageOfCommentReactions(long commentId, int page, int size) throws CommentNotFoundException {
+        findById(commentId);
+        Page<UserCommentReaction> reactions = userCommentReactionRepository.findAllByCommentId(commentId, PageRequest.of(page, size));
+        return new PageImpl<>(reactions
+                        .stream()
+                        .map(this::mapReactionToReactionResponseDTO)
+                .toList());
     }
 
     @Transactional
@@ -156,7 +152,12 @@ public class CommentServiceImpl implements CommentService{
             notificationRepository.save(notification);
         }
     }
-
+    private ReactionResponseDTO mapReactionToReactionResponseDTO(UserCommentReaction userCommentReaction) {
+        return new ReactionResponseDTO(
+                userCommentReaction.getUser().getId(),
+                userCommentReaction.getUser().getUsername(),
+                userCommentReaction.isStatus());
+    }
     private CommentResponseDTO mapCommentToResponseDTO(Comment comment) {
         Long repliedCommentId = comment.getRepliedComment() == null ? null : comment.getRepliedComment().getId();
         return new CommentResponseDTO(comment.getId(),
@@ -164,6 +165,8 @@ public class CommentServiceImpl implements CommentService{
                 comment.getPost().getId(),
                 repliedCommentId,
                 comment.getContent(),
-                comment.getCreatedAt());
+                comment.getCreatedAt(),
+                userCommentReactionRepository.countAllByCommentIdAndStatusTrue(comment.getId()),
+                userCommentReactionRepository.countAllByCommentIdAndStatusFalse(comment.getId()));
     }
 }

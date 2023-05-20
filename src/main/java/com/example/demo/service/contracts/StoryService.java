@@ -1,8 +1,11 @@
 package com.example.demo.service.contracts;
 
-import com.example.demo.model.dto.CreateStoryDTO;
-import com.example.demo.model.dto.StoryResponseDTO;
+import com.example.demo.model.dto.ReactionResponseDTO;
+import com.example.demo.model.dto.story.CreateStoryDTO;
+import com.example.demo.model.dto.story.StoryResponseDTO;
+import com.example.demo.model.exception.StoryNotFoundException;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.io.File;
@@ -21,4 +24,6 @@ public interface StoryService {
     @Scheduled(fixedRate = HOUR_IN_MILLISECONDS)
     @Transactional
     void deleteExpiredStoriesEveryHour();
+
+    Page<ReactionResponseDTO> getPageOfStoryReactions(long storyId, int page, int size) throws StoryNotFoundException;
 }

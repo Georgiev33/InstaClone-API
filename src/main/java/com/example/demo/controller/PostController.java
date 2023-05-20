@@ -1,12 +1,14 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.dto.post.CreatePostDTO;
+import com.example.demo.model.dto.ReactionResponseDTO;
 import com.example.demo.model.dto.post.PostResponseDTO;
 import com.example.demo.service.contracts.PostService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,7 +34,16 @@ public class PostController {
     public List<String> getPostMedia(@PathVariable long postId) {
         return postService.getAllPostUrls(postId);
     }
-
+    @GetMapping("/{postId}")
+    public PostResponseDTO getPostById(@PathVariable long postId){
+        return postService.getPostById(postId);
+    }
+    @GetMapping("/{postId}/reactions")
+    public Page<ReactionResponseDTO> getPageOfPostReactions(@PathVariable long postId,
+                                                            @RequestParam(required = false, defaultValue = "0") int page,
+                                                            @RequestParam(required = false, defaultValue = "10") int size){
+        return postService.getPageOfPostReactions(postId, page, size);
+    }
     @GetMapping("/content/{fileName}")
     @SneakyThrows
     public void getPostMedia(@PathVariable String fileName, HttpServletResponse response) {
