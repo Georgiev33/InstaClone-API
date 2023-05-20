@@ -1,18 +1,22 @@
 package com.example.demo.model.entity;
 
+import com.example.demo.model.Ownable;
 import com.example.demo.model.Postable;
+import com.example.demo.model.exception.InvalidOwnerException;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.Set;
 
+import static com.example.demo.util.constants.MessageConstants.INVALID_OWNER_MESSAGE;
+
 @Entity(name = "stories")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Story implements Postable {
+public class Story implements Postable, Ownable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -44,4 +48,11 @@ public class Story implements Postable {
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private Set<User> userTags;
+
+    @Override
+    public void verifyOwnerIdOrThrow(long userId) throws InvalidOwnerException {
+        if(!this.user.getId().equals(userId)){
+            throw new InvalidOwnerException(INVALID_OWNER_MESSAGE);
+        }
+    }
 }

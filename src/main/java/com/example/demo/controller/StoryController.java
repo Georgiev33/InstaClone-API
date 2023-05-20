@@ -19,7 +19,17 @@ import java.nio.file.Files;
 @RequiredArgsConstructor
 public class StoryController {
     private final StoryService storyService;
-
+    @GetMapping("/{storyId}")
+    public StoryResponseDTO getStoryById(@PathVariable long storyId){
+        return storyService.getStoryById(storyId);
+    }
+    @GetMapping("/user/{userId}")
+    public Page<StoryResponseDTO> getPageOfStoriesForUser(@PathVariable long userId,
+                                                          @RequestParam(required = false, defaultValue = "0") int page,
+                                                          @RequestParam(required = false, defaultValue = "10") int size
+                                                          ){
+        return storyService.getPageOfStoriesForUser(userId, page, size);
+    }
     @PostMapping
     public ResponseEntity<StoryResponseDTO> createStory(@ModelAttribute @Valid CreateStoryDTO dto,
                                                         @RequestHeader("Authorization") String authToken) {
@@ -45,6 +55,10 @@ public class StoryController {
                           @RequestHeader("Authorization") String authToken,
                           @RequestParam boolean status) {
         storyService.react(authToken, storyId, status);
+    }
+    @DeleteMapping("/{storyId}")
+    public void deleteStory(@PathVariable long storyId, @RequestHeader("Authorization") String authToken){
+       storyService.deleteStory(storyId, authToken);
     }
 
 }

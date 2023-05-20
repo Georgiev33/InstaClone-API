@@ -4,8 +4,11 @@ import com.example.demo.model.dto.ReactionResponseDTO;
 import com.example.demo.model.dto.story.CreateStoryDTO;
 import com.example.demo.model.dto.story.StoryResponseDTO;
 import com.example.demo.model.entity.*;
+import com.example.demo.model.entity.post.Post;
+import com.example.demo.model.exception.InvalidOwnerException;
 import com.example.demo.model.exception.NotFoundException;
 import com.example.demo.model.exception.StoryNotFoundException;
+import com.example.demo.model.exception.UserNotFoundException;
 import com.example.demo.repository.*;
 import com.example.demo.service.contracts.*;
 import com.example.demo.util.constants.MessageConstants;
@@ -36,7 +39,7 @@ public class StoryServiceImpl implements StoryService {
     private final HashTagService hashTagService;
     private final JwtService jwtService;
     private final UserStoryReactionRepository userStoryReactionRepository;
-
+    private final AdminService adminService;
     @Override
     @Transactional
     public StoryResponseDTO createStory(CreateStoryDTO dto, String authToken) {
@@ -100,6 +103,33 @@ public class StoryServiceImpl implements StoryService {
                 .stream()
                 .map(this::mapReactionToReactionResponseDTO).toList());
     }
+
+    @Override
+    public StoryResponseDTO getStoryById(long storyId) throws StoryNotFoundException {
+        Story story = findStoryById(storyId);
+        return mapStoryToStoryResponseDTO(story);
+    }
+
+    @Override
+    public Page<StoryResponseDTO> getPageOfStoriesForUser(long userId, int page, int size) throws UserNotFoundException {
+        Page<Story> userStories = storyRepository.findAllByUserId(userId, PageRequest.of(page, size));
+        return new PageImpl<>(userStories
+                .stream()
+                .map(this::mapStoryToStoryResponseDTO).toList());
+    }
+
+    @Override
+    public void deleteStory(long storyId, String authToken) throws StoryNotFoundException, InvalidOwnerException {
+        Story story = findStoryById(storyId);
+        long userId = jwtService.extractUserId(authToken);
+        if(adminService.isLoggedUserAdmin()){
+            storyRepository.delete(story);
+            return;
+        }
+        story.verifyOwnerIdOrThrow(userId);
+        storyRepository.delete(story);
+    }
+
     private ReactionResponseDTO mapReactionToReactionResponseDTO(UserStoryReaction userStoryReaction) {
         return new ReactionResponseDTO(
                 userStoryReaction.getUser().getId(),
