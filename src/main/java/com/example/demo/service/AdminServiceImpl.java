@@ -118,7 +118,7 @@ public class AdminServiceImpl implements AdminService {
         return SecurityContextHolder.getContext().getAuthentication().getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
-                .anyMatch(a -> a.contains(ADMIN));
+                .anyMatch(a -> a.equals(ADMIN));
     }
 
     private ReportedUser findReportByIdElseThrowNotFound(long reportId) {
@@ -128,7 +128,7 @@ public class AdminServiceImpl implements AdminService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return user.getFollowers().stream()
                 .map(User::getUsername)
-                .anyMatch(u -> u.contains(authentication.getName()));
+                .anyMatch(u -> u.equals(authentication.getName()));
     }
 
 
