@@ -20,7 +20,7 @@ public interface UserService extends UserDetailsService {
 
     List<UserWithUsernameAndIdDTO> getFollowers(String authToken);
 
-    List<UserWithUsernameAndIdDTO> getFollowing(String authToken);
+    List<UserWithUsernameAndIdDTO> getFollowings(String authToken);
 
     void setPrivateUser(String authToken);
 

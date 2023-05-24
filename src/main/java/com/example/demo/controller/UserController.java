@@ -67,7 +67,7 @@ public class UserController {
 
     @GetMapping("/following")
     public List<UserWithUsernameAndIdDTO> getFollowing(@RequestHeader("Authorization") String authToken) {
-        return userService.getFollowing(authToken);
+        return userService.getFollowings(authToken);
     }
 
     @GetMapping("{userId}/posts")

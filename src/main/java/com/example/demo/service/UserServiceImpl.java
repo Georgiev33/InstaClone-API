@@ -9,7 +9,6 @@ import com.example.demo.repository.PostRepository;
 import com.example.demo.repository.report.ReportedUserRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.contracts.*;
-import com.example.demo.util.constants.MessageConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -105,7 +104,7 @@ public class UserServiceImpl implements UserService {
                 .toList();
     }
     @Override
-    public List<UserWithUsernameAndIdDTO> getFollowing(String authToken) throws UserNotFoundException {
+    public List<UserWithUsernameAndIdDTO> getFollowings(String authToken) throws UserNotFoundException {
         long userId = jwtService.extractUserId(authToken);
         return userValidationService.findUserById(userId)
                 .getFollowing()

@@ -1,10 +1,14 @@
 package com.example.demo.service;
 
+import com.example.demo.model.dto.ReportedUsers.ReportUserDTO;
 import com.example.demo.model.dto.user.UserRegistrationDTO;
 import com.example.demo.model.dto.user.UserUpdateDTO;
+import com.example.demo.model.dto.user.UserWithUsernameAndIdDTO;
 import com.example.demo.model.entity.Role;
 import com.example.demo.model.entity.User;
+import com.example.demo.model.entity.report.ReportedUser;
 import com.example.demo.model.exception.*;
+import com.example.demo.repository.PostRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.repository.report.ReportedUserRepository;
 import com.example.demo.service.contracts.*;
@@ -15,15 +19,18 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 import static com.example.demo.util.constants.Constants.USER;
 import static com.example.demo.util.constants.MessageConstants.USER_CAN_T_FOLLOW_ITSELF;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -48,10 +55,12 @@ public class UserServiceImpTest {
     private RoleService roleService;
     @Mock
     private ReportedUserRepository reportedUsersRepository;
+    @Mock
+    private PostRepository postRepository;
 
     @BeforeEach
     public void setup() {
-        userService = new UserServiceImpl(userRepository, encoder, userValidationService, authenticationManager
+        userService = new UserServiceImpl(userRepository, postRepository, encoder, userValidationService, authenticationManager
                 , mailService, jwtService, roleService, reportedUsersRepository);
     }
 
@@ -183,20 +192,22 @@ public class UserServiceImpTest {
                     userService.followUser(followedUserId, TEST_JWT_TOKEN);
                 })
                 .withMessage(USER_CAN_T_FOLLOW_ITSELF);
+        verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
-    public void followUserShouldThrowUserNotFoundExceptionIfFollowedUserIdIsInvalid(){
+    public void followUserShouldThrowUserNotFoundExceptionIfFollowedUserIdIsInvalid() {
         //arrange
         long followedUserId = 1L;
         when(jwtService.extractUserId(anyString())).thenReturn(2L);
         doThrow(UserNotFoundException.class).when(userValidationService).findUserById(anyLong());
         //act and assert
         assertThrows(UserNotFoundException.class, () -> userService.followUser(followedUserId, TEST_JWT_TOKEN));
+        verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
-    public void followUserShouldFollowUser(){
+    public void followUserShouldFollowUser() {
         //arrange
         ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
         User followedUser = User.builder()
@@ -214,7 +225,7 @@ public class UserServiceImpTest {
         when(userValidationService.findUserById(2L)).thenReturn(followingUser);
 
         //act
-        userService.followUser(followedUserId,TEST_JWT_TOKEN);
+        userService.followUser(followedUserId, TEST_JWT_TOKEN);
 
         //assert
         verify(userRepository).save(captor.capture());
@@ -226,6 +237,181 @@ public class UserServiceImpTest {
         verify(userRepository).save(eq(followedUser));
     }
 
+    @Test
+    public void loadUserByUsernameShouldReturnUserDetailsWhenUsernameExists() {
+        //arrange
+        String username = "existingUser";
+        User existUser = User.builder().build();
+        when(userValidationService.getUsernameForLoginOrThrowException(username)).thenReturn(existUser);
+
+        //act
+        UserDetails result = userService.loadUserByUsername(username);
+
+        //assert
+        verify(userValidationService).getUsernameForLoginOrThrowException(username);
+        assertEquals(existUser, result);
+    }
+
+    @Test
+    public void loadUserByUsernameShouldThrowUserNotFoundExceptionWhenUsernameIsInvalid() {
+        //arrange
+        String username = "invalidUser";
+        doThrow(UserNotFoundException.class).when(userValidationService).getUsernameForLoginOrThrowException(anyString());
+        //act and assert
+        assertThrows(UserNotFoundException.class, () -> userService.loadUserByUsername(username));
+    }
+
+    @Test
+    public void getFollowersShouldThrowUserNotFoundExceptionIfUsernameIsInvalid() {
+        //arrange
+        when(jwtService.extractUserId(anyString())).thenReturn(1L);
+        doThrow(UserNotFoundException.class).when(userValidationService).findUserById(anyLong());
+        //act and assert
+        assertThrows(UserNotFoundException.class, () -> userService.getFollowers(TEST_JWT_TOKEN));
+    }
+
+    @Test
+    public void getFollowersShouldReturnListOfUserWithUsernameAndId() {
+        //arrange
+        when(jwtService.extractUserId(anyString())).thenReturn(1L);
+        when(userValidationService.findUserById(anyLong())).thenReturn(User.builder().followers(new HashSet<>()).build());
+
+        //act
+        List<UserWithUsernameAndIdDTO> followers = userService.getFollowers(anyString());
+
+        //assert
+        assertThat(followers).isNotNull();
+    }
+
+    @Test
+    public void getFollowingsShouldThrowUserNotFoundExceptionIfUsernameIsInvalid() {
+        //arrange
+        when(jwtService.extractUserId(anyString())).thenReturn(1L);
+        doThrow(UserNotFoundException.class).when(userValidationService).findUserById(anyLong());
+        //act and assert
+        assertThrows(UserNotFoundException.class, () -> userService.getFollowings(TEST_JWT_TOKEN));
+    }
+
+    @Test
+    public void getFollowingShouldReturnListOfUserWithUsernameAndId() {
+        //arrange
+        when(jwtService.extractUserId(anyString())).thenReturn(1L);
+        when(userValidationService.findUserById(anyLong())).thenReturn(User.builder().following(new HashSet<>()).build());
+
+        //act
+        List<UserWithUsernameAndIdDTO> followers = userService.getFollowings(anyString());
+
+        //assert
+        assertThat(followers).isNotNull();
+    }
+
+    @Test
+    public void setPrivateUserShouldThrowUserNotFoundExceptionIfUsernameIsInvalid() {
+        //arrange
+        when(jwtService.extractUserId(anyString())).thenReturn(1L);
+        doThrow(UserNotFoundException.class).when(userValidationService).findUserById(anyLong());
+        //act and assert
+        assertThrows(UserNotFoundException.class, () -> userService.setPrivateUser(TEST_JWT_TOKEN));
+    }
+
+    @Test
+    public void serPrivateUserShouldSetPrivateUser() {
+        //arrange
+        ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+        when(jwtService.extractUserId(anyString())).thenReturn(1L);
+        User userToBePrivate = User.builder()
+                .id(1L)
+                .username("testUsername")
+                .email("testEmail")
+                .password("testPassword")
+                .bio("oldBio")
+                .verificationCode("testVerificationCode")
+                .isVerified(true)
+                .isPrivate(false)
+                .build();
+        when(userValidationService.findUserById(anyLong())).thenReturn(userToBePrivate);
+
+        //act
+        userService.setPrivateUser(TEST_JWT_TOKEN);
+
+        //assert
+        verify(userRepository).save(captor.capture());
+        User captured = captor.getValue();
+        assertThat(captured.isPrivate()).isTrue();
+        assertThat(captured).usingRecursiveComparison()
+                .ignoringFields("isPrivate")
+                .isEqualTo(userToBePrivate);
+
+    }
+
+    @Test
+    public void reportUserShouldThrowReportedUserAlreadyExistExceptionWhenReportedUserIsAlreadyReported() {
+        //arrange
+        ReportUserDTO reportUserDTO = new ReportUserDTO(1, "testReason");
+        when(jwtService.extractUserId(anyString())).thenReturn(1L);
+        when(reportedUsersRepository.findByReporterIdAndReportedId(anyLong(), anyLong()))
+                .thenReturn(Optional.ofNullable(ReportedUser.builder().build()));
+        //act and assert
+        assertThatExceptionOfType(ReportedUserAlreadyExist.class)
+                .isThrownBy(() -> {
+                    userService.reportUser(reportUserDTO, TEST_JWT_TOKEN);
+                })
+                .withMessage("User with id" + reportUserDTO.reportedId() + " is already reported");
+        verify(userValidationService, never()).throwExceptionIfUserNotFound(anyLong());
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    public void reportUserShouldThrowUserNotFoundExceptionWhenReportedUserIdIsInvalid() {
+        //arrange
+        ReportUserDTO reportUserDTO = new ReportUserDTO(1, "testReason");
+        when(jwtService.extractUserId(anyString())).thenReturn(1L);
+        when(reportedUsersRepository.findByReporterIdAndReportedId(anyLong(), anyLong()))
+                .thenReturn(Optional.empty());
+        doThrow(UserNotFoundException.class).when(userValidationService).throwExceptionIfUserNotFound(anyLong());
+        //act and assert
+        assertThrows(UserNotFoundException.class, () -> userService.reportUser(reportUserDTO, TEST_JWT_TOKEN));
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    public void reportUserShouldReportUser() {
+        //arrange
+        ArgumentCaptor<ReportedUser> captor = ArgumentCaptor.forClass(ReportedUser.class);
+        ReportUserDTO reportUserDTO = new ReportUserDTO(2, "testReason");
+        when(jwtService.extractUserId(anyString())).thenReturn(1L);
+        ReportedUser expectedReportedUser = ReportedUser.builder()
+                .reporterId(1L)
+                .reportedId(reportUserDTO.reportedId())
+                .reason(reportUserDTO.reason())
+                .build();
+        when(reportedUsersRepository.findByReporterIdAndReportedId(anyLong(), anyLong()))
+                .thenReturn(Optional.empty());
+
+        //act
+        userService.reportUser(reportUserDTO, TEST_JWT_TOKEN);
+
+        // assert
+        verify(reportedUsersRepository).save(captor.capture());
+        assertThat(captor.getValue()).usingRecursiveComparison()
+                .ignoringFields("id")
+                .isEqualTo(expectedReportedUser);
+        verify(userValidationService).throwExceptionIfUserNotFound(eq(reportUserDTO.reportedId()));
+        verify(reportedUsersRepository).findByReporterIdAndReportedId(eq(1L), eq(reportUserDTO.reportedId()));
+    }
+
+    @Test
+    public void gertUserByIdShouldThrowUserNotFoundExceptionWhenReportedUserIdIsInvalid() {
+        //arrange
+        ReportUserDTO reportUserDTO = new ReportUserDTO(1, "testReason");
+        when(jwtService.extractUserId(anyString())).thenReturn(1L);
+        when(reportedUsersRepository.findByReporterIdAndReportedId(anyLong(), anyLong()))
+                .thenReturn(Optional.empty());
+        doThrow(UserNotFoundException.class).when(userValidationService).throwExceptionIfUserNotFound(anyLong());
+        //act and assert
+        assertThrows(UserNotFoundException.class, () -> userService.reportUser(reportUserDTO, TEST_JWT_TOKEN));
+        verify(userRepository, never()).save(any(User.class));
+    }
 
 
 }
