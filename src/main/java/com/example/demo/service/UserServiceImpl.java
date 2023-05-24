@@ -92,10 +92,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException, BannedUserException {
-        User user = userValidationService.getUsernameForLoginOrThrowException(username);
-        userValidationService.throwExceptionIfUserIsBanned(user.getId());
-        return user;
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException{
+        return userValidationService.getUsernameForLoginOrThrowException(username);
     }
     @Override
     public List<UserWithUsernameAndIdDTO> getFollowers(String authToken) throws UserNotFoundException {
